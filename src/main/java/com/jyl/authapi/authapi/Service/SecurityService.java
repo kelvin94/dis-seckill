@@ -16,18 +16,18 @@ Main purpose of SecurityService
     -  check what access an user has based on user's role
  */
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    private static final Logger logger = LoggerFactory.getLogger(SecurityService.class);
-
-    public String findLoggedInUsername() {
-        Object userDetails = SecurityContextHolder.getContext().getAuthentication().getDetails();
-        if (userDetails instanceof UserDetails) {
-            return ((UserDetails)userDetails).getUsername();
-        }
-
-        return null;
-    }
+//    @Autowired
+//    private UserDetailsService userDetailsService;
+//
+//    private static final Logger logger = LoggerFactory.getLogger(SecurityService.class);
+//
+//    public String findLoggedInUsername() {
+//        Object userDetails = SecurityContextHolder.getContext().getAuthentication().getDetails();
+//        if (userDetails instanceof UserDetails) {
+//            return ((UserDetails)userDetails).getUsername();
+//        }
+//
+//        return null;
+//    }
 
 }

@@ -1,5 +1,6 @@
 package com.jyl.authapi.authapi.Service;
 
+import com.jyl.authapi.authapi.inputParameter.AuthParameter;
 import com.jyl.authapi.authapi.model.User;
 import com.jyl.authapi.authapi.repository.RoleRepository;
 import com.jyl.authapi.authapi.repository.UserRepository;
@@ -17,18 +18,23 @@ Main purpose of UserService:
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    public void save(User user) {
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user.setRoles(new HashSet<>(roleRepository.findAll()));
-    }
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
+//    @Autowired
+//    private UserRepository userRepository;
+//    @Autowired
+//    private RoleRepository roleRepository;
+//    @Autowired
+//    private BCryptPasswordEncoder bCryptPasswordEncoder;
+//
+//    public void save(User user) {
+//        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+//        user.setRoles(new HashSet<>(roleRepository.findAll()));
+//    }
+//    public User findByUsername(String username) {
+//        return userRepository.findByUsername(username);
+//    }
+//
+//    public String entryPoint(AuthParameter parameter) {
+//        String response = "entryPoint - UserService";
+//        return response;
+//    }
 }

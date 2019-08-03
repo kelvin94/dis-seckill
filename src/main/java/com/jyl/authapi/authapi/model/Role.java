@@ -1,21 +1,29 @@
 package com.jyl.authapi.authapi.model;
 
+import org.hibernate.annotations.NaturalId;
+
 import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "role")
+@Table(name = "roles")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Enumerated(EnumType.STRING)
+    @NaturalId
+    @Column(length = 60)
+    private RoleName name;
 
-    @ManyToMany(
-            fetch=FetchType.LAZY,
-            mappedBy = "roles") // " mappedBy" indicates the entity is the inverse of the relationship.
-    private Set<User> users;
+    public Role() {
+
+    }
+
+    public Role(RoleName name) {
+        this.name = name;
+    }
 
     public Long getId() {
         return id;
@@ -25,19 +33,11 @@ public class Role {
         this.id = id;
     }
 
-    public String getName() {
+    public RoleName getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(RoleName name) {
         this.name = name;
-    }
-
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
     }
 }
