@@ -3,7 +3,6 @@ package com.jyl.authapi.authapi.Controller;
 import com.jyl.authapi.authapi.Service.SecurityService;
 import com.jyl.authapi.authapi.Service.UserRoleInfoService;
 import com.jyl.authapi.authapi.Service.UserService;
-import com.jyl.authapi.authapi.inputParameter.AuthParameter;
 import com.jyl.authapi.authapi.validator.UserValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
