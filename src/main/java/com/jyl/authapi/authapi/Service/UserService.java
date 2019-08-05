@@ -1,5 +1,6 @@
 package com.jyl.authapi.authapi.Service;
 
+import com.jyl.authapi.authapi.inputParameter.AuthParameter;
 import com.jyl.authapi.authapi.model.User;
 import com.jyl.authapi.authapi.repository.RoleRepository;
 import com.jyl.authapi.authapi.repository.UserRepository;

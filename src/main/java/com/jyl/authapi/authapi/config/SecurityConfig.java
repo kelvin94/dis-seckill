@@ -64,11 +64,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
    security configurations and allows other classes to extend it and customize the security configurations by
    overriding its methods.
 
-     */
-
-
-
-    /*
     To authenticate a User or perform various role-based checks, Spring security needs to load users details somehow.
 
     For this purpose, It consists of an interface called UserDetailsService which has a single method that loads a
@@ -90,11 +85,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     /*
-    JwtAuthenticationEntryPoint class is used to return a 401 unauthorized error to clients that try to access a
-    protected resource without proper authentication. It implements Spring Security’s AuthenticationEntryPoint
-    interface.
-    AuthenticationEntryPoint can be used to set necessary response headers, content-type, and so on before sending
-    the response back to the client.
+    JwtAuthenticationEntryPoint class is used to return a 401 unauthorized error to clients that try to access a protected resource without proper authentication. It implements Spring Security’s AuthenticationEntryPoint interface.
+    AuthenticationEntryPoint can be used to set necessary response headers, content-type, and so on before sending the response back to the client.
 
 
      */
@@ -156,13 +148,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         restricting access to other APIs to authenticated users only.
          */
 
-
         http
-                .cors()
+                .cors()                             // enable cors support
                 .and()
-                .csrf()
+                .csrf()         // disable csrf protection
                 .disable()
-                .exceptionHandling()
+                .exceptionHandling() // Allows configuring exception handling. This is automatically applied when using WebSecurityConfigurerAdapter.
                 .authenticationEntryPoint(unauthorizedHandler)
                 .and()
                 .sessionManagement()
@@ -178,14 +169,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.html",
                         "/**/*.css",
                         "/**/*.js")
-                .permitAll()
+                .permitAll() // permitAll() will configure the authorization so that all requests are allowed on that particular path
                 .antMatchers("/api/auth/**")
                 .permitAll()
                 .antMatchers("/api/user/checkUsernameAvailability", "/api/user/checkEmailAvailability")
                 .permitAll()
                 .antMatchers(HttpMethod.GET, "/api/polls/**", "/api/users/**")
                 .permitAll()
-                .anyRequest()
+                .anyRequest() // anyRequest().authenticated() 意思是所有request都需要authenticated
                 .authenticated();
 
 
