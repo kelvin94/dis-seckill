@@ -66,15 +66,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     To authenticate a User or perform various role-based checks, Spring security needs to load users details somehow.
 
-    For this purpose, It consists of an interface called UserDetailsService which has a single method that loads a
-    user based on username-
+    For this purpose, It consists of an interface called UserDetailsService which has a single method that loads a user based on username-
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 
     We’ll define a CustomUserDetailsService that implements UserDetailsService interface and provides the
     implementation for loadUserByUsername() method.
 
-    Note that, the loadUserByUsername() method returns a UserDetails object that Spring Security uses for performing
-    various authentication and role based validations.
+    Note that, the loadUserByUsername() method returns a UserDetails object that Spring Security uses for performing various authentication and role based validations.
 
     We’ll also define a custom UserPrincipal class that will implement UserDetails interface, and return the
     UserPrincipal object from loadUserByUsername() method.

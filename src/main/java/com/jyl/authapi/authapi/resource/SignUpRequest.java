@@ -22,6 +22,9 @@ public class SignUpRequest {
     @Size(min = 6, max = 20)
     private String password;
 
+    @Size(min = 128)
+    private String invitationCode;
+
     public String getName() {
         return name;
     }
@@ -52,5 +55,12 @@ public class SignUpRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setInvitationCode(String invitationCode) {
+        this.invitationCode = invitationCode;
+    }
+    public String getInvitationCode(){
+        return invitationCode;
     }
 }

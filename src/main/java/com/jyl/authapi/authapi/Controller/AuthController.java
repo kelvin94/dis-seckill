@@ -7,8 +7,8 @@ import com.jyl.authapi.authapi.model.User;
 import com.jyl.authapi.authapi.repository.RoleRepository;
 import com.jyl.authapi.authapi.repository.UserRepository;
 import com.jyl.authapi.authapi.resource.*;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.validation.Valid;
 import java.net.URI;
