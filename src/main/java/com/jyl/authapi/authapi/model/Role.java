@@ -1,28 +1,50 @@
 package com.jyl.authapi.authapi.model;
 
-import javax.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+import javax.persistence.*;
+import java.util.List;
+
+@Data
 @Entity
 @Table(name = "roles")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ROLE_ID")
     private Long id;
 
 //    @Enumerated(EnumType.STRING)
 //    @NaturalId
 //    @Column(length = 60)
 //    private RoleName name;
-    @OneToOne(mappedBy = "role", fetch = FetchType.LAZY)
-    private RoleName name;
+//    @OneToOne(mappedBy = "role",
+//            fetch = FetchType.LAZY,
+//            optional = true,
+//            cascade = CascadeType.ALL)
+//    @JoinColumn(name = "ROLENAME_ID")
+//    private RoleName roleName;
+    @Column(name = "role_name")
+    private String roleName;
+
+    @Getter
+    @Setter
+    @OneToMany(fetch = FetchType.LAZY,
+            mappedBy = "role",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<InvitationCode> invitionCode;
+
 
     public Role() {
 
     }
 
-    public Role(RoleName name) {
-        this.name = name;
-    }
+//    public Role(RoleName roleName) {
+//        this.roleName = roleName;
+//    }
 
     public Long getId() {
         return id;
@@ -32,11 +54,11 @@ public class Role {
         this.id = id;
     }
 
-    public RoleName getName() {
-        return name;
-    }
+//    public RoleName getRoleName() {
+//        return roleName;
+//    }
 
-    public void setName(RoleName name) {
-        this.name = name;
-    }
+//    public void setRoleName(RoleName roleName) {
+//        this.roleName = roleName;
+//    }
 }
