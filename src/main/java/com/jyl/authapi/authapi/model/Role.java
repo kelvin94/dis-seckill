@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -35,7 +36,7 @@ public class Role {
             mappedBy = "role",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<InvitationCode> invitionCode;
+    private List<InvitationCode> invitationCodes = new ArrayList<InvitationCode>();
 
 
     public Role() {
@@ -53,6 +54,8 @@ public class Role {
     public void setId(Long id) {
         this.id = id;
     }
+
+
 
 //    public RoleName getRoleName() {
 //        return roleName;

@@ -1,5 +1,6 @@
 package com.jyl.authapi.authapi.Controller;
 
+import com.jyl.authapi.authapi.Utility.AuthApiUtil;
 import com.jyl.authapi.authapi.exception.AppException;
 import com.jyl.authapi.authapi.model.InvitationCode;
 import com.jyl.authapi.authapi.model.Role;
@@ -24,17 +25,15 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
     private  final static Logger logger = LogManager.getLogger(AuthController.class);
-
+    static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    static SecureRandom rnd = new SecureRandom();
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -56,10 +55,7 @@ public class AuthController {
     @GetMapping("/testingDB")
     public String testingDB() {
         String result = null;
-        SecureRandom random = new SecureRandom();
-        byte bytes[] = new byte[15]; // 120 bits are converted to 16 bytes;
-        random.nextBytes(bytes); // nextBytes(byte[] bytes) method is used to generate random bytes and places them into a user-supplied byte array.
-        logger.debug("ramdon 120 bits " + bytes);
+
         InvitationCode code = new InvitationCode();
         code.setCode("ramdon bits 1");
 
@@ -78,14 +74,14 @@ public class AuthController {
 //        invitationCodeRepository.save(code);
 //        invitationCodeRepository.save(code2);
         invitationCodeList.addAll(Arrays.asList(code, code2));
-        role.setInvitionCode(invitationCodeList);
+        role.setInvitationCodes(invitationCodeList);
         role.setRoleName("testing");
 
         roleRepository.save(role);
 
         logger.debug("##### showing rolename field in role: " + role.getRoleName());
         logger.debug("\n");
-        logger.debug("##### showing invitation code from rolename " + role.getInvitionCode());
+        logger.debug("##### showing invitation code from rolename " + role.getInvitationCodes());
         return result;
     }
 
@@ -144,5 +140,61 @@ public class AuthController {
                 .buildAndExpand(result.getUsername()).toUri();
 
         return ResponseEntity.created(location).body(new ApiResponse(true, "User registered successfully"));
+    }
+
+    @PostMapping("/role")
+    public ResponseEntity<?> createNewRole(@Valid @RequestBody NewRoleRequest requestParam) {
+
+
+        Role role = new Role();
+        role.setRoleName(requestParam.getRoleName());
+        roleRepository.save(role);
+
+        return ResponseEntity.status(201).body(new ApiResponse(true, "New role is generated successfully"));
+
+    }
+
+    @PostMapping("/code")
+    public ResponseEntity<?> createNewCode(@Valid @RequestBody NewCodeRequest requestParam) {
+        String roleType = requestParam.getRoleType();
+        if(!roleRepository.existsByRoleName(roleType)) {
+            return new ResponseEntity(new ApiResponse(false, roleType + " role type does not exist and get out of my server!"),
+                    HttpStatus.BAD_REQUEST);
+        }
+        String code = generateRandomString(128);
+        logger.debug("ramdon 120 bits " + code);
+
+        InvitationCode dbobjCode = new InvitationCode();
+        dbobjCode.setCode(code);
+        Role role = null;
+        switch(roleType.toLowerCase()) {
+            case AuthApiUtil.ROLE_ADMIN:
+                role = roleRepository.findByRoleName(AuthApiUtil.ROLE_ADMIN);
+                logger.debug("############# found role " + role);
+                dbobjCode.setRole(role);
+                break;
+            case AuthApiUtil.ROLE_FAMILY:
+                role = roleRepository.findByRoleName(AuthApiUtil.ROLE_FAMILY);
+                dbobjCode.setRole(role);
+                break;
+            case AuthApiUtil.ROLE_FRIEND:
+                role = roleRepository.findByRoleName(AuthApiUtil.ROLE_FRIEND);
+                dbobjCode.setRole(role);
+                break;
+        }
+
+        invitationCodeRepository.save(dbobjCode);
+
+
+
+
+        return ResponseEntity.status(201).body(new ApiResponse(true, "New code is generated successfully", code));
+    }
+
+    private String generateRandomString( int len ){
+        StringBuilder sb = new StringBuilder( len );
+        for( int i = 0; i < len; i++ )
+            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+        return sb.toString();
     }
 }

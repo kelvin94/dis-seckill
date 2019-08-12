@@ -1,12 +1,23 @@
 package com.jyl.authapi.authapi.resource;
 
+import lombok.Data;
+
+@Data
 public class ApiResponse {
     private Boolean success;
     private String message;
+    private String code;
 
     public ApiResponse(Boolean success, String message) {
         this.success = success;
         this.message = message;
+    }
+
+    public ApiResponse(Boolean success, String message, String code) {
+        this.success = success;
+        this.message = message;
+        this.code = code;
+
     }
 
     public Boolean getSuccess() {
