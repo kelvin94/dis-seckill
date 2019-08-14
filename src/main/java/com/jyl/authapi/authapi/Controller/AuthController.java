@@ -142,6 +142,22 @@ public class AuthController {
         return ResponseEntity.created(location).body(new ApiResponse(true, "User registered successfully"));
     }
 
+    @DeleteMapping("/role/{roleType}")
+    public ResponseEntity<?> deleteRole(@PathVariable("roleType") String roleType) {
+//        if(roleType.equalsIgnoreCase(AuthApiUtil.ROLE_ADMIN)) {
+//            return new ResponseEntity(new ApiResponse(false, " Don't try this."),
+//                    HttpStatus.UNAUTHORIZED);
+//        }
+        if(!roleRepository.existsByRoleName(roleType)) {
+            return new ResponseEntity(new ApiResponse(false, " Role does not exist and get out of my server!"),
+                    HttpStatus.BAD_REQUEST);
+        }
+        Role dbRole = roleRepository.findByRoleName(roleType);
+        roleRepository.delete(dbRole);
+        return ResponseEntity.status(201).body(new ApiResponse(true, "role is removed successfully"));
+
+    }
+
     @PostMapping("/role")
     public ResponseEntity<?> createNewRole(@Valid @RequestBody NewRoleRequest requestParam) {
 
@@ -152,6 +168,21 @@ public class AuthController {
 
         return ResponseEntity.status(201).body(new ApiResponse(true, "New role is generated successfully"));
 
+    }
+
+    @DeleteMapping("/code/{code}")
+    public ResponseEntity<?> deleteCode(@PathVariable("code") String code) {
+        if(!invitationCodeRepository.existsByCode(code)) {
+            return new ResponseEntity(new ApiResponse(false, " Code does not exist and get out of my server!"),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+
+        InvitationCode dbCode = invitationCodeRepository.findByCode(code);
+        logger.debug("delete code end point, find the code in db first "+ dbCode);
+        invitationCodeRepository.delete(dbCode);
+
+        return ResponseEntity.status(201).body(new ApiResponse(true, "New code is generated successfully", code));
     }
 
     @PostMapping("/code")
@@ -170,7 +201,6 @@ public class AuthController {
         switch(roleType.toLowerCase()) {
             case AuthApiUtil.ROLE_ADMIN:
                 role = roleRepository.findByRoleName(AuthApiUtil.ROLE_ADMIN);
-                logger.debug("############# found role " + role);
                 dbobjCode.setRole(role);
                 break;
             case AuthApiUtil.ROLE_FAMILY:
@@ -184,10 +214,6 @@ public class AuthController {
         }
 
         invitationCodeRepository.save(dbobjCode);
-
-
-
-
         return ResponseEntity.status(201).body(new ApiResponse(true, "New code is generated successfully", code));
     }
 

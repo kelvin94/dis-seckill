@@ -23,7 +23,7 @@ public class InvitationCode {
     @Column(name = "code")
     private String code;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="ROLE_ID", nullable=false)
     private Role role;
 
