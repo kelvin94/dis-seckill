@@ -2,6 +2,7 @@ package com.jyl.authapi.authapi.resource;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class SignUpRequest {
@@ -23,6 +24,7 @@ public class SignUpRequest {
     private String password;
 
     @Size(min = 128)
+    @NotNull(message = "invit code is null")
     private String invitationCode;
 
     public String getName() {

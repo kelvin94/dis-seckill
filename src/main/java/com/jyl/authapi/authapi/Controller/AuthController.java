@@ -26,6 +26,8 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -60,28 +62,40 @@ public class AuthController {
         code.setCode("ramdon bits 1");
 
 
-        InvitationCode code2 = new InvitationCode();
-        code2.setCode("ramdon bits 2");
-
-
-
         Role role = new Role();
-//        code.setRole(role);
+        role.setRoleName("happy ganja man");
+        code.setRole(role);
 //        code2.setRole(role);
-
-
-        List<InvitationCode> invitationCodeList = new ArrayList<InvitationCode>();
-//        invitationCodeRepository.save(code);
-//        invitationCodeRepository.save(code2);
-        invitationCodeList.addAll(Arrays.asList(code, code2));
-        role.setInvitationCodes(invitationCodeList);
-        role.setRoleName("testing");
-
+        role.setInvitationCodes(Arrays.asList(code));
         roleRepository.save(role);
+        invitationCodeRepository.save(code);
+
 
         logger.debug("##### showing rolename field in role: " + role.getRoleName());
         logger.debug("\n");
         logger.debug("##### showing invitation code from rolename " + role.getInvitationCodes());
+
+        User user = new User();
+        user.setRole(role);
+        user.setInvitationCode(code);
+        user.setUsername("jylkel");
+        user.setEmail("jylkelvin@hotmail.com");
+        user.setPassword("fsfdsafdsfas");
+        user.setName("jylkel");
+        userRepository.save(user);
+        logger.debug("##### done saving user ");
+        User tempUser = userRepository.findByUsername("jylkel");
+        logger.debug("##### dispay saved user name "+ tempUser.getUsername());
+        logger.debug("##### dispay saved user role "+ tempUser.getRole().getRoleName());
+        logger.debug("##### dispay saved user code "+ tempUser.getInvitationCode());
+
+
+
+        InvitationCode tempCode = invitationCodeRepository.findByCode("ramdon bits 1");
+        Long roleId = tempCode.getRole().getId();
+        logger.debug("##### display roles from code: "+ tempCode.getRole());
+        Optional<Role> tempRole = roleRepository.findById(roleId);
+        logger.debug("##### display code from role: ");
         return result;
     }
 
@@ -112,14 +126,7 @@ public class AuthController {
             return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"),
                     HttpStatus.BAD_REQUEST);
         }
-        /*
-        TODO: 如果request body里面有invitation code，先睇头8bit，分辨是哪种用户
-                有哪几种用户：
-                    - 11111111: admin
-                    - 11111110: 屋企人
-                    - 11111101: 朋友
-                    - else: 叁唔识七人
-         */
+
 
         // Creating user's account
         User user = new User(signUpRequest.getName(), signUpRequest.getUsername(),
@@ -127,10 +134,12 @@ public class AuthController {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        Role userRole = roleRepository.findById(null)
-                .orElseThrow(() -> new AppException("User Role not set."));
+//        List<Role> userRole = roleRepository.findById(null)
+//                .orElseThrow(() -> new AppException("User Role not set."));
+        String invitationCode = signUpRequest.getInvitationCode();
+        Role userRole = roleRepository.findByInvitationCodes(invitationCode);
 
-        user.setRoles(Collections.singleton(userRole));
+        user.setRole(userRole);
         logger.debug("#####finishing setting roles.");
         User result = userRepository.save(user);
         logger.debug("#####finishing saving user.");

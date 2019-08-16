@@ -7,6 +7,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -27,6 +28,11 @@ public class Role {
 //            cascade = CascadeType.ALL)
 //    @JoinColumn(name = "ROLENAME_ID")
 //    private RoleName roleName;
+    @OneToMany(fetch = FetchType.LAZY,
+                mappedBy = "role",
+            cascade = CascadeType.ALL)
+    private Set<User> user;
+
     @Column(name = "role_name")
     private String roleName;
 
@@ -37,6 +43,7 @@ public class Role {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<InvitationCode> invitationCodes = new ArrayList<InvitationCode>();
+
 
 
     public Role() {
