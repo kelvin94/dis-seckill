@@ -51,13 +51,14 @@ public class User extends DateAudit {
 //    @JoinColumn(name="ROLE_ID", nullable=false)
 //    private Set<Role> roles = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="ROLE_ID", nullable=false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="ROLE_ID")
     private Role role;
 
-    @OneToOne(fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    private InvitationCode invitationCode;
+//    @OneToOne(fetch = FetchType.LAZY,
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true)
+//    private InvitationCode invitationCode;
 
     public User(String name, String username, String email, String password) {
         this.name = name;
@@ -66,4 +67,15 @@ public class User extends DateAudit {
         this.password = password;
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", role=" + role +
+                '}';
+    }
 }

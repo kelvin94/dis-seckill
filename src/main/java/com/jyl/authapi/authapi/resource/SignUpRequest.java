@@ -23,7 +23,7 @@ public class SignUpRequest {
     @Size(min = 6, max = 20)
     private String password;
 
-    @Size(min = 128)
+    @Size(min = 120)
     @NotNull(message = "invit code is null")
     private String invitationCode;
 

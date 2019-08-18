@@ -13,38 +13,38 @@ import java.util.Set;
 @Entity
 @Table(name = "roles")
 public class Role {
+    @Getter
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ROLE_ID")
     private Long id;
 
-//    @Enumerated(EnumType.STRING)
-//    @NaturalId
-//    @Column(length = 60)
-//    private RoleName name;
-//    @OneToOne(mappedBy = "role",
-//            fetch = FetchType.LAZY,
-//            optional = true,
-//            cascade = CascadeType.ALL)
-//    @JoinColumn(name = "ROLENAME_ID")
-//    private RoleName roleName;
+    @Getter
     @OneToMany(fetch = FetchType.LAZY,
                 mappedBy = "role",
-            cascade = CascadeType.ALL)
-    private Set<User> user;
-
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<User> user = new ArrayList<User>();
+    @Getter
+    @Setter
     @Column(name = "role_name")
     private String roleName;
 
     @Getter
-    @Setter
     @OneToMany(fetch = FetchType.LAZY,
             mappedBy = "role",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<InvitationCode> invitationCodes = new ArrayList<InvitationCode>();
 
+    public void setInvitationCodes(List<InvitationCode> invitationCodes) {
+        this.invitationCodes.addAll(invitationCodes);
+    }
 
+    public void setUser(List<User> users) {
+        this.user.addAll(users);
+    }
 
     public Role() {
 
@@ -62,6 +62,15 @@ public class Role {
         this.id = id;
     }
 
+    @Override
+    public String toString() {
+        return "Role{" +
+                "id=" + id +
+                ", user=" + user +
+                ", roleName='" + roleName + '\'' +
+                ", invitationCodes=" + invitationCodes +
+                '}';
+    }
 
 
 //    public RoleName getRoleName() {

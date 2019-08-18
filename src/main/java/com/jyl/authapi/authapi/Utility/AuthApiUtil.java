@@ -8,4 +8,6 @@ public class AuthApiUtil {
 
     public static final String ROLE_FRIEND = "friend";
 
+    public static final String ROLE_OUTSIDER = "outsider";
+
 }

@@ -24,17 +24,19 @@ public class InvitationCode {
     @Column(name = "code")
     private String code;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="ROLE_ID", nullable=false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="ROLE_ID")
     private Role role;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private User user;
+//    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private User user;
 
     @Override
     public String toString() {
         return "InvitationCode{" +
-                "code='" + code + '\'' +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", role=" + role.getId() +
                 '}';
     }
 }

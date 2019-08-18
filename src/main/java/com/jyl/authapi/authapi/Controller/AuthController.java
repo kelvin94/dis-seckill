@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.persistence.EntityNotFoundException;
+import javax.swing.text.html.Option;
 import javax.validation.Valid;
 import java.net.URI;
 import java.security.SecureRandom;
@@ -55,7 +57,7 @@ public class AuthController {
     JwtTokenProvider tokenProvider;
 
     @GetMapping("/testingDB")
-    public String testingDB() {
+    public void testingDB() {
         String result = null;
 
         InvitationCode code = new InvitationCode();
@@ -63,21 +65,29 @@ public class AuthController {
 
 
         Role role = new Role();
-        role.setRoleName("happy ganja man");
+        role.setRoleName("ggininder");
         code.setRole(role);
 //        code2.setRole(role);
-        role.setInvitationCodes(Arrays.asList(code));
+        List<InvitationCode> arr_code = new ArrayList<InvitationCode>();
+        arr_code.add(code);
+        role.setInvitationCodes(arr_code);
         roleRepository.save(role);
         invitationCodeRepository.save(code);
 
 
-        logger.debug("##### showing rolename field in role: " + role.getRoleName());
+        logger.debug("##### showing role id field in code: " + code.getRole().getId());
+        logger.debug("##### showing role id field in code: " + code.getRole().getRoleName());
         logger.debug("\n");
-        logger.debug("##### showing invitation code from rolename " + role.getInvitationCodes());
+        for(InvitationCode temp : role.getInvitationCodes()) {
+            logger.debug("##### showing invitation code from role, code string: " + temp.getCode());
+            logger.debug("##### showing invitation code from role, code id: " + temp.getId());
+            logger.debug("##### showing which role does this code belongs to : role id - " + temp.getRole().getId() + " role name: "+ temp.getRole().getRoleName());
+        }
+
+
 
         User user = new User();
         user.setRole(role);
-        user.setInvitationCode(code);
         user.setUsername("jylkel");
         user.setEmail("jylkelvin@hotmail.com");
         user.setPassword("fsfdsafdsfas");
@@ -85,18 +95,48 @@ public class AuthController {
         userRepository.save(user);
         logger.debug("##### done saving user ");
         User tempUser = userRepository.findByUsername("jylkel");
-        logger.debug("##### dispay saved user name "+ tempUser.getUsername());
-        logger.debug("##### dispay saved user role "+ tempUser.getRole().getRoleName());
-        logger.debug("##### dispay saved user code "+ tempUser.getInvitationCode());
+        Role ampRole = roleRepository.findByRoleName("ggininder");
+        logger.debug("##### ampRole "+ ampRole.getRoleName());
+        logger.debug("##### ampRole "+ ampRole.getId());
+        List<User> arr_user = ampRole.getUser();
+
+        logger.debug("##### arr_user "+ arr_user);
+
+        if(arr_user == null || arr_user.isEmpty() || arr_user.size() ==0){
+            List<User> newArr = new ArrayList<User>();
+
+            newArr.add(tempUser);
+            logger.debug("##### 1");
+            ampRole.getUser().clear();
+            ampRole.setUser(newArr);
+            logger.debug("##### 2");
+        } else {
+            logger.debug("##### else");
+            ampRole.getUser().clear();
+
+            arr_user.add(tempUser);
+            ampRole.setUser(arr_user);
+        }
+
+//        logger.debug("##### arr_user "+ arr_user);
+        logger.debug("##### ampRole getting saved "+ ampRole.getUser().size());
+
+        logger.debug("##### ampRole getting saved "+ ampRole.getUser().get(0).getUsername());
+        logger.debug("##### ampRole getting saved "+ ampRole.getId());
+        logger.debug("##### ampRole getting saved "+ ampRole.getRoleName());
+
+        logger.debug("##### ampRole getting saved "+ ampRole.getInvitationCodes().size());
 
 
 
-        InvitationCode tempCode = invitationCodeRepository.findByCode("ramdon bits 1");
-        Long roleId = tempCode.getRole().getId();
-        logger.debug("##### display roles from code: "+ tempCode.getRole());
-        Optional<Role> tempRole = roleRepository.findById(roleId);
-        logger.debug("##### display code from role: ");
-        return result;
+        roleRepository.save(ampRole);
+        logger.debug("##### end");
+
+        Optional<InvitationCode> tempCode = invitationCodeRepository.findByCode("ramdon bits 1");
+        Long roleId = tempCode.get().getRole().getId();
+        logger.debug(" remove role, 检查code table + usertable， 距地两个应该都要系空的");
+        roleRepository.delete(role);
+//        return result;
     }
 
     @PostMapping("/signin")
@@ -126,29 +166,42 @@ public class AuthController {
             return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"),
                     HttpStatus.BAD_REQUEST);
         }
+        String code = signUpRequest.getInvitationCode();
+        /*
+             检查验证码。。。
+         */
+        Optional<InvitationCode> findRoleByCode = invitationCodeRepository.findByCode(code);
+        Role role = findRoleByCode.get().getRole();
+//        logger.debug("##### 根據code找到了role "+role);
 
+        if( role != null) {
+            // Creating user's account
+            User user = new User(signUpRequest.getName(), signUpRequest.getUsername(),
+                    signUpRequest.getEmail(), signUpRequest.getPassword());
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setRole(role);
+            logger.debug("#####finishing setting roles.");
 
-        // Creating user's account
-        User user = new User(signUpRequest.getName(), signUpRequest.getUsername(),
-                signUpRequest.getEmail(), signUpRequest.getPassword());
+            User result = userRepository.save(user);
+            logger.debug("#####finishing saving user. ");
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+            Optional<InvitationCode> dbCode = invitationCodeRepository.findByCode(code);
+            if(dbCode.isPresent() || dbCode != null) {
+                List<InvitationCode> arrCode = new ArrayList<InvitationCode>();
+                arrCode.add(dbCode.get());
+                role.setInvitationCodes(arrCode);
+            }
+            Role savedRoleResult = roleRepository.save(role);
+            logger.debug("#####finishing updating role with new code. ");
 
-//        List<Role> userRole = roleRepository.findById(null)
-//                .orElseThrow(() -> new AppException("User Role not set."));
-        String invitationCode = signUpRequest.getInvitationCode();
-        Role userRole = roleRepository.findByInvitationCodes(invitationCode);
+            URI location = ServletUriComponentsBuilder
+                    .fromCurrentContextPath().path("/api/users/{username}")
+                    .buildAndExpand(result.getUsername()).toUri();
 
-        user.setRole(userRole);
-        logger.debug("#####finishing setting roles.");
-        User result = userRepository.save(user);
-        logger.debug("#####finishing saving user.");
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath().path("/api/users/{username}")
-                .buildAndExpand(result.getUsername()).toUri();
-
-        return ResponseEntity.created(location).body(new ApiResponse(true, "User registered successfully"));
+            return ResponseEntity.created(location).body(new ApiResponse(true, "User registered successfully"));
+        }
+        return new ResponseEntity(new ApiResponse(false, "cannot create new user!"),
+                HttpStatus.BAD_REQUEST);
     }
 
     @DeleteMapping("/role/{roleType}")
@@ -187,9 +240,9 @@ public class AuthController {
         }
 
 
-        InvitationCode dbCode = invitationCodeRepository.findByCode(code);
-        logger.debug("delete code end point, find the code in db first "+ dbCode);
-        invitationCodeRepository.delete(dbCode);
+        Optional<InvitationCode> dbCode = invitationCodeRepository.findByCode(code);
+        logger.debug("delete code end point, find the code in db first "+ dbCode.get());
+        invitationCodeRepository.delete(dbCode.get());
 
         return ResponseEntity.status(201).body(new ApiResponse(true, "New code is generated successfully", code));
     }
@@ -218,6 +271,10 @@ public class AuthController {
                 break;
             case AuthApiUtil.ROLE_FRIEND:
                 role = roleRepository.findByRoleName(AuthApiUtil.ROLE_FRIEND);
+                dbobjCode.setRole(role);
+                break;
+            default:
+                role = roleRepository.findByRoleName(AuthApiUtil.ROLE_OUTSIDER);
                 dbobjCode.setRole(role);
                 break;
         }

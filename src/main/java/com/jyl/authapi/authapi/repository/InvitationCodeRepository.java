@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface InvitationCodeRepository extends JpaRepository<InvitationCode, Long> {
-    InvitationCode findByCode(String code);
+    Optional<InvitationCode> findByCode(String code);
     Boolean existsByCode(String code);
 
     // Using JQL with parameters:
