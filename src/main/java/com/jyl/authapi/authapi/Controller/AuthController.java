@@ -14,9 +14,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -56,87 +58,21 @@ public class AuthController {
     @Autowired
     JwtTokenProvider tokenProvider;
 
-    @GetMapping("/testingDB")
-    public void testingDB() {
-        String result = null;
+//    @PreAuthorize("hashRole('admin')")
+//    @GetMapping("/testingAuthorization")
+//    public String testingAuthorization() {
+//        return "shit it works";
+//    }
 
-        InvitationCode code = new InvitationCode();
-        code.setCode("ramdon bits 1");
-
-
-        Role role = new Role();
-        role.setRoleName("ggininder");
-        code.setRole(role);
-//        code2.setRole(role);
-        List<InvitationCode> arr_code = new ArrayList<InvitationCode>();
-        arr_code.add(code);
-        role.setInvitationCodes(arr_code);
-        roleRepository.save(role);
-        invitationCodeRepository.save(code);
-
-
-        logger.debug("##### showing role id field in code: " + code.getRole().getId());
-        logger.debug("##### showing role id field in code: " + code.getRole().getRoleName());
-        logger.debug("\n");
-        for(InvitationCode temp : role.getInvitationCodes()) {
-            logger.debug("##### showing invitation code from role, code string: " + temp.getCode());
-            logger.debug("##### showing invitation code from role, code id: " + temp.getId());
-            logger.debug("##### showing which role does this code belongs to : role id - " + temp.getRole().getId() + " role name: "+ temp.getRole().getRoleName());
+    @PostMapping("/token/verify")
+    public ResponseEntity<?> testingDB(@Valid @RequestBody TokenVerificationReq tokenVerificationReq) {
+        String token = tokenVerificationReq.getToken();
+        boolean isValidToken = tokenProvider.validateToken(token);
+        if(isValidToken) {
+            String roleName = tokenProvider.getUserRoleNameFromJWT(token);
+            return new ResponseEntity(new ApiResponse(true, roleName), HttpStatus.OK);
         }
-
-
-
-        User user = new User();
-        user.setRole(role);
-        user.setUsername("jylkel");
-        user.setEmail("jylkelvin@hotmail.com");
-        user.setPassword("fsfdsafdsfas");
-        user.setName("jylkel");
-        userRepository.save(user);
-        logger.debug("##### done saving user ");
-        User tempUser = userRepository.findByUsername("jylkel");
-        Role ampRole = roleRepository.findByRoleName("ggininder");
-        logger.debug("##### ampRole "+ ampRole.getRoleName());
-        logger.debug("##### ampRole "+ ampRole.getId());
-        List<User> arr_user = ampRole.getUser();
-
-        logger.debug("##### arr_user "+ arr_user);
-
-        if(arr_user == null || arr_user.isEmpty() || arr_user.size() ==0){
-            List<User> newArr = new ArrayList<User>();
-
-            newArr.add(tempUser);
-            logger.debug("##### 1");
-            ampRole.getUser().clear();
-            ampRole.setUser(newArr);
-            logger.debug("##### 2");
-        } else {
-            logger.debug("##### else");
-            ampRole.getUser().clear();
-
-            arr_user.add(tempUser);
-            ampRole.setUser(arr_user);
-        }
-
-//        logger.debug("##### arr_user "+ arr_user);
-        logger.debug("##### ampRole getting saved "+ ampRole.getUser().size());
-
-        logger.debug("##### ampRole getting saved "+ ampRole.getUser().get(0).getUsername());
-        logger.debug("##### ampRole getting saved "+ ampRole.getId());
-        logger.debug("##### ampRole getting saved "+ ampRole.getRoleName());
-
-        logger.debug("##### ampRole getting saved "+ ampRole.getInvitationCodes().size());
-
-
-
-        roleRepository.save(ampRole);
-        logger.debug("##### end");
-
-        Optional<InvitationCode> tempCode = invitationCodeRepository.findByCode("ramdon bits 1");
-        Long roleId = tempCode.get().getRole().getId();
-        logger.debug(" remove role, 检查code table + usertable， 距地两个应该都要系空的");
-        roleRepository.delete(role);
-//        return result;
+        return new ResponseEntity(new ApiResponse(false, "no rolename found"), HttpStatus.UNAUTHORIZED);
     }
 
     @PostMapping("/signin")
@@ -150,8 +86,9 @@ public class AuthController {
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String jwt = tokenProvider.generateToken(authentication);
+        Collection<? extends GrantedAuthority> authority = authentication.getAuthorities();
+        if(authority == null || authority.isEmpty()) return new ResponseEntity(new ApiResponse(false, "No role is found"), HttpStatus.NOT_FOUND);
+        String jwt = tokenProvider.generateToken(authentication, authority);
         return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
     }
 
@@ -190,6 +127,10 @@ public class AuthController {
                 List<InvitationCode> arrCode = new ArrayList<InvitationCode>();
                 arrCode.add(dbCode.get());
                 role.setInvitationCodes(arrCode);
+            } else {
+                // DB 沒有這個驗證碼，讓他滾
+                return new ResponseEntity(new ApiResponse(false, "code not found!"),
+                        HttpStatus.BAD_REQUEST);
             }
             Role savedRoleResult = roleRepository.save(role);
             logger.debug("#####finishing updating role with new code. ");
@@ -204,12 +145,33 @@ public class AuthController {
                 HttpStatus.BAD_REQUEST);
     }
 
+    @DeleteMapping("/user/{userId}/{username}")
+    public String deleteUser(@PathVariable("userId") Long user_dbId, @PathVariable("username") String username) {
+        String response = null;
+        if(user_dbId == null || username == null) {
+            return new ResponseEntity(new ApiResponse(false, "empty input!"),
+                    HttpStatus.BAD_REQUEST).toString();
+        }
+
+        if(!userRepository.existsByUsername(username) || !userRepository.existsById(user_dbId)) {
+            logger.error("user not found, user id: " + user_dbId);
+            return new ResponseEntity(new ApiResponse(false, "user not found!"),
+                    HttpStatus.BAD_REQUEST).toString();
+        }
+
+        Optional<User> user = userRepository.findById(user_dbId);
+        if(user.isPresent()) {
+            userRepository.delete(user.get());
+            return new ResponseEntity(new ApiResponse(true, "done delete!"),
+                    HttpStatus.OK).toString();
+        } else {
+            logger.error("User not found! user id: " + user_dbId);
+        }
+        return response;
+    }
+
     @DeleteMapping("/role/{roleType}")
     public ResponseEntity<?> deleteRole(@PathVariable("roleType") String roleType) {
-//        if(roleType.equalsIgnoreCase(AuthApiUtil.ROLE_ADMIN)) {
-//            return new ResponseEntity(new ApiResponse(false, " Don't try this."),
-//                    HttpStatus.UNAUTHORIZED);
-//        }
         if(!roleRepository.existsByRoleName(roleType)) {
             return new ResponseEntity(new ApiResponse(false, " Role does not exist and get out of my server!"),
                     HttpStatus.BAD_REQUEST);
@@ -222,8 +184,6 @@ public class AuthController {
 
     @PostMapping("/role")
     public ResponseEntity<?> createNewRole(@Valid @RequestBody NewRoleRequest requestParam) {
-
-
         Role role = new Role();
         role.setRoleName(requestParam.getRoleName());
         roleRepository.save(role);
