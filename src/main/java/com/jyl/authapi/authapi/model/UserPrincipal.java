@@ -36,8 +36,7 @@ public class UserPrincipal implements UserDetails {
     }
 
     public static UserPrincipal create(User user) {
-        // .map(role ->
-        //                new SimpleGrantedAuthority(role.getRoleName())
+
         GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().getRoleName());
         return new UserPrincipal(
                 user.getId(),
