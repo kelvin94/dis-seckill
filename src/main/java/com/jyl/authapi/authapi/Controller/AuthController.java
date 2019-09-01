@@ -1,5 +1,6 @@
 package com.jyl.authapi.authapi.Controller;
 
+import com.jyl.authapi.authapi.Service.TokenService;
 import com.jyl.authapi.authapi.Utility.AuthApiUtil;
 import com.jyl.authapi.authapi.exception.AppException;
 import com.jyl.authapi.authapi.model.InvitationCode;
@@ -58,26 +59,20 @@ public class AuthController {
     @Autowired
     JwtTokenProvider tokenProvider;
 
-//    @PreAuthorize("hashRole('admin')")
-//    @GetMapping("/testingAuthorization")
-//    public String testingAuthorization() {
-//        return "shit it works";
-//    }
+    @Autowired
+    private TokenService tokenService;
 
     @PostMapping("/token/verify")
-    public ResponseEntity<?> testingDB(@Valid @RequestBody TokenVerificationReq tokenVerificationReq) {
-        String token = tokenVerificationReq.getToken();
-        boolean isValidToken = tokenProvider.validateToken(token);
-        if(isValidToken) {
-            String roleName = tokenProvider.getUserRoleNameFromJWT(token);
-            return new ResponseEntity(new ApiResponse(true, roleName), HttpStatus.OK);
+    public String verifyToken(@Valid @RequestBody TokenVerificationReq tokenVerificationReq) {
+        String result = tokenService.verifyToken(tokenVerificationReq);
+        if(result.isEmpty()) {
+            return AuthApiUtil.convertToJson(new ApiResponse(false, "Invalid token"));
         }
-        return new ResponseEntity(new ApiResponse(false, "no rolename found"), HttpStatus.UNAUTHORIZED);
+        return result;
     }
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsernameOrEmail(),
