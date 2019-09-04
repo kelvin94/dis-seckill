@@ -2,6 +2,7 @@ package com.jyl.authapi.authapi.model;
 
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "roles")
 public class Role {
@@ -46,9 +48,7 @@ public class Role {
         this.user.addAll(users);
     }
 
-    public Role() {
 
-    }
 
 //    public Role(RoleName roleName) {
 //        this.roleName = roleName;
