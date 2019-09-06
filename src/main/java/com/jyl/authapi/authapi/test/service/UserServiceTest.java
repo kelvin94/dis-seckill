@@ -50,6 +50,7 @@ public class UserServiceTest {
     private  final static Logger logger = LogManager.getLogger(UserServiceTest.class);
     private LoginRequest loginRequest = new LoginRequest();
     private SignUpRequest signUpRequest = new SignUpRequest();
+    private ResetPwdRequest request = new ResetPwdRequest();
     private String jwtToken = "somejwttoken";
     @Mock
     private JwtTokenProvider tokenProvider;
@@ -260,4 +261,59 @@ public class UserServiceTest {
         assertTrue(actual.getHttpStatus().toString().equalsIgnoreCase(HttpStatus.BAD_REQUEST.toString()));
     }
 
+    @Test
+    public void testResetPwd() {
+        String username = signUpRequest.getUsername();
+        String oldpwd = signUpRequest.getPassword();
+        String email = signUpRequest.getEmail();
+
+        String newPwd = "jjjjjj";
+        request.setEmail(email);
+        request.setOldPwd(oldpwd);
+        request.setNewPwd(newPwd);
+        User user = new User(signUpRequest.getName(), signUpRequest.getUsername(),
+                signUpRequest.getEmail(), signUpRequest.getPassword());
+        when(userRepository.existsByEmail(email)).thenReturn(true);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches(request.getOldPwd(), user.getPassword())).thenReturn(true);
+
+        String encodedPwd = "newEncodedPwd";
+        when(passwordEncoder.encode(newPwd)).thenReturn(encodedPwd);
+//        user.setPassword(encodedPwd);
+        when(userRepository.save(user)).thenReturn(user);
+        ApiResponse expectedResponse = new ApiResponse();
+        expectedResponse.setSuccess(true);
+        expectedResponse.setHttpStatus(HttpStatus.OK);
+
+        ApiResponse actual = userService.resetPwd(request);
+        assertNotNull(actual);
+        assertTrue(actual.getSuccess());
+        assertTrue(actual.getHttpStatus().toString().equalsIgnoreCase(expectedResponse.getHttpStatus().toString()));
+        verify(passwordEncoder, times(1)).encode(request.getNewPwd());
+    }
+
+    @Test
+    public void testResetPwd_oldPwdNotMatchNewPwd() {
+        String username = signUpRequest.getUsername();
+        String oldpwd = signUpRequest.getPassword();
+        String email = signUpRequest.getEmail();
+
+        String newPwd = "jjjjjj";
+        request.setEmail(email);
+        request.setOldPwd(oldpwd);
+        request.setNewPwd(newPwd);
+        User user = new User(signUpRequest.getName(), signUpRequest.getUsername(),
+                signUpRequest.getEmail(), signUpRequest.getPassword());
+        when(userRepository.existsByEmail(email)).thenReturn(true);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(request.getOldPwd(), user.getPassword())).thenReturn(false);
+
+
+        ApiResponse actual = userService.resetPwd(request);
+        assertNotNull(actual);
+        assertFalse(actual.getSuccess());
+        verify(passwordEncoder, times(0)).encode(request.getNewPwd());
+        verify(userRepository, times(0)).save(user);
+    }
 }

@@ -165,4 +165,40 @@ public class UserService {
         }
         return response;
     }
+
+    public ApiResponse resetPwd(ResetPwdRequest request) {
+        ApiResponse response = new ApiResponse();
+        if(!userRepository.existsByEmail(request.getEmail())) {
+            logger.error("user not found, user Email: " + request.getEmail());
+            return new ApiResponse(false, "user not found!",
+                    HttpStatus.NOT_FOUND);
+        }
+        Optional<User> dbUser = userRepository.findByEmail(request.getEmail());
+        if(dbUser.isPresent()) {
+
+            boolean isMatchedPwd = passwordEncoder.matches(request.getOldPwd(), dbUser.get().getPassword());
+
+            if(isMatchedPwd) {
+                User user = dbUser.get();
+
+                user.setPassword(passwordEncoder.encode(request.getNewPwd()));
+                try {
+                    userRepository.save(user);
+
+                } catch (DataAccessException e) {
+                    logger.error("UserService resetPwd(), user: "+ request.getEmail() + " processing threw exception, error" + e.getMessage());
+                    throw e;
+                }
+                response.setSuccess(true);
+                response.setHttpStatus(HttpStatus.OK);
+                response.setMessage("Reset done");
+            } else {
+                logger.error("UserService resetPassword(), user: "+ dbUser.get().getEmail() + " old password does not match db");
+                return new ApiResponse(false, "user: "+ dbUser.get().getEmail() + " old password does not match db",
+                        HttpStatus.BAD_REQUEST);
+            }
+        }
+        return response;
+
+    }
 }

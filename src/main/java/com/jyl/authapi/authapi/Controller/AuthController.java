@@ -109,6 +109,18 @@ public class AuthController {
         return AuthApiUtil.convertToJson(result);
     }
 
+    @PutMapping("/user")
+    public String resetPwd(@Valid @RequestBody ResetPwdRequest request) {
+        ApiResponse result = new ApiResponse();
+
+        try {
+            result = userService.resetPwd(request);
+        } catch (Exception e) {
+            logger.error("reset pwd service error: " + e.getMessage());
+        }
+        return AuthApiUtil.convertToJson(result);
+    }
+
     @DeleteMapping("/user/{userId}/{username}")
     public String deleteUser(@PathVariable("userId") Long user_dbId, @PathVariable("username") String username) {
         ApiResponse result = new ApiResponse();
