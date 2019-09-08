@@ -1,24 +1,24 @@
 package com.jyl.authapi.authapi.config;
 
 import com.jyl.authapi.authapi.Security.JwtAuthenticationFilter;
-import com.jyl.authapi.authapi.Service.InvitationCodeService;
-import com.jyl.authapi.authapi.Service.RoleService;
-import com.jyl.authapi.authapi.Service.TokenService;
-import com.jyl.authapi.authapi.Service.UserService;
+import com.jyl.authapi.authapi.Service.*;
+import com.jyl.authapi.authapi.repository.InvitationCodeRepository;
+import com.jyl.authapi.authapi.repository.RoleRepository;
+import com.jyl.authapi.authapi.repository.UserRepository;
+import com.jyl.authapi.authapi.resource.JwtTokenProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.BeanIds;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class BeanConfig {
 
-
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter();
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider tokenProvider, CustomUserDetailsService customUserDetailsService) {
+        return new JwtAuthenticationFilter(tokenProvider, customUserDetailsService);
     }
 
     @Bean
@@ -26,9 +26,9 @@ public class BeanConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public TokenService tokenService() {
-        return new TokenService();
+//    @Bean
+    public TokenService tokenService(JwtTokenProvider tokenProvider) {
+        return new TokenService(tokenProvider);
     }
 
     @Bean
@@ -36,11 +36,15 @@ public class BeanConfig {
         return new InvitationCodeService();
     }
 
-    @Bean
-    public RoleService roleService() {
-        return new RoleService();
+//    @Bean
+    public RoleService roleService(RoleRepository roleRepository) {
+        return new RoleService(roleRepository);
     }
 
-    @Bean
-    public UserService userService() { return new UserService(); }
+//    @Bean
+    public UserService userService(AuthenticationManager authenticationManager, UserRepository userRepository,
+                                   InvitationCodeRepository invitationCodeRepository, RoleRepository roleRepository,
+                                   PasswordEncoder passwordEncoder, JwtTokenProvider tokenProvider) {
+        return new UserService(authenticationManager, userRepository, invitationCodeRepository, roleRepository, passwordEncoder, tokenProvider);
+    }
 }

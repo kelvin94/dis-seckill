@@ -22,6 +22,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -30,26 +31,32 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class UserService {
     private  final static Logger logger = LogManager.getLogger(UserService.class);
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private InvitationCodeRepository invitationCodeRepository;
+    private final InvitationCodeRepository invitationCodeRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    JwtTokenProvider tokenProvider;
+    private final JwtTokenProvider tokenProvider;
+
+    public UserService(AuthenticationManager authenticationManager, UserRepository userRepository,
+                       InvitationCodeRepository invitationCodeRepository, RoleRepository roleRepository,
+                       PasswordEncoder passwordEncoder, JwtTokenProvider tokenProvider) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.invitationCodeRepository = invitationCodeRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenProvider = tokenProvider;
+    }
 
     public JwtAuthenticationResponse signIn(LoginRequest loginRequest) throws AuthenticationException{
         Authentication authentication = null;

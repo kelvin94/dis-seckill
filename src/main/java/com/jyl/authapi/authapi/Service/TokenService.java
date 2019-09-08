@@ -1,25 +1,23 @@
 package com.jyl.authapi.authapi.Service;
 
-
 import com.jyl.authapi.authapi.Utility.AuthApiUtil;
 import com.jyl.authapi.authapi.resource.ApiResponse;
 import com.jyl.authapi.authapi.resource.JwtTokenProvider;
 import com.jyl.authapi.authapi.resource.TokenVerificationReq;
-import com.jyl.authapi.authapi.test.service.TokenServiceTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
-
+@Service
 public class TokenService {
     private  final static Logger logger = LogManager.getLogger(TokenService.class);
 
-    @Autowired
-    private JwtTokenProvider tokenProvider;
+    private final JwtTokenProvider tokenProvider;
+
+    public TokenService(JwtTokenProvider tokenProvider) {
+        this.tokenProvider = tokenProvider;
+    }
 
     public String verifyToken(TokenVerificationReq tokenVerificationReq) {
         String result = "";

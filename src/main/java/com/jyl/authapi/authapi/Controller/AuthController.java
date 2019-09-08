@@ -5,38 +5,14 @@ import com.jyl.authapi.authapi.Service.RoleService;
 import com.jyl.authapi.authapi.Service.TokenService;
 import com.jyl.authapi.authapi.Service.UserService;
 import com.jyl.authapi.authapi.Utility.AuthApiUtil;
-import com.jyl.authapi.authapi.exception.AppException;
-import com.jyl.authapi.authapi.model.InvitationCode;
-import com.jyl.authapi.authapi.model.Role;
-import com.jyl.authapi.authapi.model.User;
-import com.jyl.authapi.authapi.repository.InvitationCodeRepository;
-import com.jyl.authapi.authapi.repository.RoleRepository;
-import com.jyl.authapi.authapi.repository.UserRepository;
 import com.jyl.authapi.authapi.resource.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import javax.persistence.EntityNotFoundException;
-import javax.swing.text.html.Option;
 import javax.validation.Valid;
-import java.net.URI;
-import java.security.SecureRandom;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -44,35 +20,21 @@ public class AuthController {
 
     private  final static Logger logger = LogManager.getLogger(AuthController.class);
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+    private final TokenService tokenService;
 
-    @Autowired
-    UserRepository userRepository;
+    private final InvitationCodeService invitationCodeService;
 
-    @Autowired
-    RoleRepository roleRepository;
+    private final RoleService roleService;
 
-    @Autowired
-    InvitationCodeRepository invitationCodeRepository;
+    private final UserService userService;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
-    JwtTokenProvider tokenProvider;
-
-    @Autowired
-    private TokenService tokenService;
-
-    @Autowired
-    private InvitationCodeService invitationCodeService;
-
-    @Autowired
-    private RoleService roleService;
-
-    @Autowired
-    private UserService userService;
+    public AuthController(TokenService tokenService, InvitationCodeService invitationCodeService,
+                          RoleService roleService, UserService userService) {
+        this.tokenService = tokenService;
+        this.invitationCodeService = invitationCodeService;
+        this.roleService = roleService;
+        this.userService = userService;
+    }
 
     @PostMapping("/token/verify")
     public String verifyToken(@Valid @RequestBody TokenVerificationReq tokenVerificationReq) {
@@ -99,14 +61,12 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<String> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
-        ApiResponse result = new ApiResponse();
-
         try {
-            result = userService.registerUser(signUpRequest);
+            ApiResponse result = userService.registerUser(signUpRequest);
+            return (result.getSuccess() ? new ResponseEntity<>(AuthApiUtil.convertToJson(result), HttpStatus.OK) : new ResponseEntity<>(AuthApiUtil.convertToJson(result), HttpStatus.BAD_REQUEST));
         } catch(Exception e ) {
             return new ResponseEntity<>(AuthApiUtil.convertToJson(new ApiResponse(false, "Exception thrown - check the logs", HttpStatus.INTERNAL_SERVER_ERROR)), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return (result.getSuccess() ? new ResponseEntity<>(AuthApiUtil.convertToJson(result), HttpStatus.OK) : new ResponseEntity<>(AuthApiUtil.convertToJson(result), HttpStatus.BAD_REQUEST));
     }
 
     @PutMapping("/user")
@@ -123,39 +83,34 @@ public class AuthController {
 
     @DeleteMapping("/user/{userId}/{username}")
     public String deleteUser(@PathVariable("userId") Long user_dbId, @PathVariable("username") String username) {
-        ApiResponse result = new ApiResponse();
         try {
-            result = userService.deleteUser(user_dbId, username);
+            ApiResponse result = userService.deleteUser(user_dbId, username);
+            return AuthApiUtil.convertToJson(result);
 
         } catch(Exception e) {
-            return AuthApiUtil.convertToJson(new ApiResponse(false, "Exception thrown - check the logs", HttpStatus.INTERNAL_SERVER_ERROR));
+            return AuthApiUtil.convertToJson(new ApiResponse(false, "Delete user service exception thrown - check the logs, error: "+ e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
         }
 
-        return AuthApiUtil.convertToJson(result);
     }
 
     @DeleteMapping("/role/{roleType}")
     public String deleteRole(@PathVariable("roleType") String roleType) {
-        ApiResponse result = new ApiResponse();
         try {
-            result = roleService.deleteRole(roleType);
-
+            ApiResponse result = roleService.deleteRole(roleType);
+            return AuthApiUtil.convertToJson(result);
         } catch (DataAccessException e) {
-            result = new ApiResponse(false, "Failed to delete role, error: "+ e.getMessage());
-            throw e;
+            return AuthApiUtil.convertToJson(new ApiResponse(false, "Delete role exception thrown - check the logs, error: "+ e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
         }
-        return AuthApiUtil.convertToJson(result);
     }
 
     @PostMapping("/role")
     public String createNewRole(@Valid @RequestBody NewRoleRequest requestParam) {
-        ApiResponse result = new ApiResponse();
         try {
-            result = roleService.createNewRole(requestParam);
+            ApiResponse result = roleService.createNewRole(requestParam);
+            return AuthApiUtil.convertToJson(result);
         } catch (DataAccessException e) {
-            throw e;
+            return AuthApiUtil.convertToJson(new ApiResponse(false, "Delete role exception thrown - check the logs, error: "+ e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR));
         }
-        return AuthApiUtil.convertToJson(result);
     }
 
     @DeleteMapping("/code/{code}")
@@ -182,12 +137,8 @@ public class AuthController {
             logger.error("InvitationCodeService unable to save a code: "+ result);
             logger.error(e.getMessage());
             throw e;
-        } catch (Exception e) {
-            logger.error("InvitationCodeService unable to save a code: "+ result);
-            logger.error(e.getMessage());
-            throw e;
         }
-        if(!result.isEmpty() && result != null) {
+        if(!result.isEmpty()) {
             return AuthApiUtil.convertToJson(new ApiResponse(true, "new code is created", HttpStatus.CREATED, result));
         }
         return AuthApiUtil.convertToJson(new ApiResponse(false, "new code is unable to be created", HttpStatus.BAD_REQUEST, result));
