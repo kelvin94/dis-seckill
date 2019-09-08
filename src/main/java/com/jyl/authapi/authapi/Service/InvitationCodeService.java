@@ -6,40 +6,39 @@ import com.jyl.authapi.authapi.model.Role;
 import com.jyl.authapi.authapi.repository.InvitationCodeRepository;
 import com.jyl.authapi.authapi.repository.RoleRepository;
 import com.jyl.authapi.authapi.resource.ApiResponse;
-import com.jyl.authapi.authapi.resource.JwtTokenProvider;
 import com.jyl.authapi.authapi.resource.NewCodeRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class InvitationCodeService {
     private  final static Logger logger = LogManager.getLogger(InvitationCodeService.class);
 
-    @Autowired
-    private JwtTokenProvider tokenProvider;
+    private final InvitationCodeRepository invitationCodeRepository;
 
-    @Autowired
-    private InvitationCodeRepository invitationCodeRepository;
+    private final RoleRepository roleRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    public InvitationCodeService( InvitationCodeRepository invitationCodeRepository,
+                                 RoleRepository roleRepository) {
+        this.invitationCodeRepository = invitationCodeRepository;
+        this.roleRepository = roleRepository;
+    }
 
     public Boolean deleteCode(String code) {
         if(!invitationCodeRepository.existsByCode(code)) {
             return false;
         }
         Optional<InvitationCode> dbCode = invitationCodeRepository.findByCode(code);
-        invitationCodeRepository.delete(dbCode.get());
+        dbCode.ifPresent(invitationCodeRepository::delete);
         return true;
     }
 
-    public String createCode(NewCodeRequest requestParam) throws Exception{
-        String result ="";
+    public String createCode(NewCodeRequest requestParam) {
         String roleType = requestParam.getRoleType();
         if(!roleRepository.existsByRoleName(roleType)) {
             return AuthApiUtil.convertToJson(new ApiResponse(false, roleType + " role type does not exist and get out of my server!",
@@ -50,7 +49,7 @@ public class InvitationCodeService {
 
         InvitationCode dbobjCode = new InvitationCode();
         dbobjCode.setCode(code);
-        Role role = null;
+        Role role;
         switch(roleType.toLowerCase()) {
             case AuthApiUtil.ROLE_ADMIN:
                 role = roleRepository.findByRoleName(AuthApiUtil.ROLE_ADMIN);

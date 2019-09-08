@@ -26,22 +26,19 @@ public class BeanConfig {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
     public TokenService tokenService(JwtTokenProvider tokenProvider) {
         return new TokenService(tokenProvider);
     }
 
-    @Bean
-    public InvitationCodeService invitationCodeService() {
-        return new InvitationCodeService();
+    public InvitationCodeService invitationCodeService(InvitationCodeRepository invitationCodeRepository,
+                                                       RoleRepository roleRepository) {
+        return new InvitationCodeService(invitationCodeRepository, roleRepository);
     }
 
-//    @Bean
     public RoleService roleService(RoleRepository roleRepository) {
         return new RoleService(roleRepository);
     }
 
-//    @Bean
     public UserService userService(AuthenticationManager authenticationManager, UserRepository userRepository,
                                    InvitationCodeRepository invitationCodeRepository, RoleRepository roleRepository,
                                    PasswordEncoder passwordEncoder, JwtTokenProvider tokenProvider) {
