@@ -1,0 +1,467 @@
+{
+  "front-version": "2.20.0",
+  "version": 3,
+  "nodes": [
+    {
+      "type": "Service",
+      "id": "d79ddbd0-7048-48b7-b0ea-c7a8af4a1e58",
+      "lastModified": "2019-09-08T00:19:16.137-07:00",
+      "name": "Invitation code"
+    },
+    {
+      "type": "Request",
+      "method": {
+        "requestBody": true,
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+        "name": "POST"
+      },
+      "body": {
+        "formBody": {
+          "overrideContentType": true,
+          "encoding": "application/x-www-form-urlencoded",
+          "items": []
+        },
+        "bodyType": "Text",
+        "autoSetLength": true,
+        "textBody": "{\n  \"roleType\":  \"admin\"\n}"
+      },
+      "headersType": "Form",
+      "uri": {
+        "query": {
+          "delimiter": "&",
+          "items": []
+        },
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:8083",
+        "path": "/api/auth/code"
+      },
+      "id": "a106c943-f2e4-4654-a6df-280e5b0618ca",
+      "lastModified": "2019-09-08T00:18:28.127-07:00",
+      "name": "Create new invitation code",
+      "headers": [
+        {
+          "enabled": true,
+          "name": "Authorization",
+          "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzY29wZSI6ImFkbWluIiwiZXhwIjoxNTY4NTMxODk1LCJ1c2VySWQiOjF9.pxwdqGlzrMQPRKNfL3OhecnAu9UtvMATtBdYtkgCWMg"
+        },
+        {
+          "enabled": true,
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaInfo": {},
+      "parentId": "d79ddbd0-7048-48b7-b0ea-c7a8af4a1e58"
+    },
+    {
+      "type": "Request",
+      "method": {
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+        "name": "DELETE"
+      },
+      "body": {
+        "formBody": {
+          "overrideContentType": true,
+          "encoding": "application/x-www-form-urlencoded",
+          "items": []
+        },
+        "bodyType": "Text",
+        "autoSetLength": true,
+        "textBody": "{\n  \"roleType\":  \"admin\"\n}"
+      },
+      "headersType": "Form",
+      "uri": {
+        "query": {
+          "delimiter": "&",
+          "items": []
+        },
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:8083",
+        "path": "/api/auth/code/uaIgZWyxpDPQBzH1yAKZVHKdVg5oKoc2GWPEPuJ2rWQMYeG2aIRK9aaHCIdS4X4IVYogqwp6RGe96WiJo3uHfdNn9xh9dFfuWtaL9KxxE8plTe4w1sPNn8uq"
+      },
+      "id": "2bfa3ba4-9eb8-484f-a54f-ca97111a4a4d",
+      "lastModified": "2019-09-08T00:19:16.137-07:00",
+      "name": "delete invitation code",
+      "headers": [
+        {
+          "enabled": true,
+          "name": "Authorization",
+          "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzY29wZSI6ImFkbWluIiwiZXhwIjoxNTY4NTMxODk1LCJ1c2VySWQiOjF9.pxwdqGlzrMQPRKNfL3OhecnAu9UtvMATtBdYtkgCWMg"
+        }
+      ],
+      "metaInfo": {},
+      "parentId": "d79ddbd0-7048-48b7-b0ea-c7a8af4a1e58"
+    },
+    {
+      "type": "Service",
+      "id": "be6c634b-960d-43d5-8d50-b0f8312d235e",
+      "lastModified": "2019-09-08T10:04:29.604-07:00",
+      "name": "Role"
+    },
+    {
+      "type": "Request",
+      "method": {
+        "requestBody": true,
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+        "name": "POST"
+      },
+      "body": {
+        "formBody": {
+          "overrideContentType": true,
+          "encoding": "application/x-www-form-urlencoded",
+          "items": []
+        },
+        "bodyType": "Text",
+        "autoSetLength": true,
+        "textBody": "{\n  \"roleName\": \"admin\"\n}"
+      },
+      "headersType": "Form",
+      "uri": {
+        "query": {
+          "delimiter": "&",
+          "items": []
+        },
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:8083",
+        "path": "/api/auth/role"
+      },
+      "id": "0bcd30f8-b4b1-4720-a53f-6c0dec74f8e3",
+      "lastModified": "2019-09-08T10:04:29.605-07:00",
+      "name": "create new role",
+      "headers": [
+        {
+          "enabled": true,
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "enabled": true,
+          "name": "Authorization",
+          "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzY29wZSI6ImFkbWluIiwiZXhwIjoxNTY4NTMxODk1LCJ1c2VySWQiOjF9.pxwdqGlzrMQPRKNfL3OhecnAu9UtvMATtBdYtkgCWMg"
+        }
+      ],
+      "metaInfo": {},
+      "parentId": "be6c634b-960d-43d5-8d50-b0f8312d235e"
+    },
+    {
+      "type": "Request",
+      "method": {
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+        "name": "DELETE"
+      },
+      "body": {
+        "formBody": {
+          "overrideContentType": true,
+          "encoding": "application/x-www-form-urlencoded",
+          "items": []
+        },
+        "bodyType": "Text",
+        "autoSetLength": true,
+        "textBody": "{\n  \"roleName\": \"admin\"\n}"
+      },
+      "headersType": "Form",
+      "uri": {
+        "query": {
+          "delimiter": "&",
+          "items": []
+        },
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:8083",
+        "path": "/api/auth/role/admin"
+      },
+      "id": "d6c0e59b-6aef-4e5c-9679-09e40a675768",
+      "lastModified": "2019-09-08T00:19:39.701-07:00",
+      "name": "delete role",
+      "headers": [
+        {
+          "enabled": true,
+          "name": "Authorization",
+          "value": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzY29wZSI6ImFkbWluIiwiZXhwIjoxNTY4NTMxODk1LCJ1c2VySWQiOjF9.pxwdqGlzrMQPRKNfL3OhecnAu9UtvMATtBdYtkgCWMg"
+        }
+      ],
+      "metaInfo": {},
+      "parentId": "be6c634b-960d-43d5-8d50-b0f8312d235e"
+    },
+    {
+      "type": "Service",
+      "id": "8a61480c-d0cb-411f-a3ca-c99dfe15b1de",
+      "lastModified": "2019-08-31T16:44:18.968-07:00",
+      "name": "Token"
+    },
+    {
+      "type": "Request",
+      "method": {
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+        "name": "GET"
+      },
+      "body": {
+        "formBody": {
+          "overrideContentType": true,
+          "encoding": "application/x-www-form-urlencoded",
+          "items": []
+        },
+        "bodyType": "Text",
+        "autoSetLength": true
+      },
+      "headersType": "Form",
+      "uri": {
+        "query": {
+          "delimiter": "&",
+          "items": []
+        },
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:8083",
+        "path": "/api/auth/testingAuthorization"
+      },
+      "id": "c3092bee-024c-442e-990d-7f8ef2a6106e",
+      "lastModified": "2019-08-31T16:44:18.968-07:00",
+      "name": "Request 1",
+      "headers": [],
+      "metaInfo": {},
+      "parentId": "8a61480c-d0cb-411f-a3ca-c99dfe15b1de"
+    },
+    {
+      "type": "Request",
+      "method": {
+        "requestBody": true,
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+        "name": "POST"
+      },
+      "body": {
+        "formBody": {
+          "overrideContentType": true,
+          "encoding": "application/x-www-form-urlencoded",
+          "items": []
+        },
+        "bodyType": "Text",
+        "autoSetLength": true,
+        "textBody": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzY29wZSI6ImFkbWluIiwiZXhwIjoxNTY3Nzc5NTQ0fQ.oVTq6DYUn-cr6SnBEQ-0N6GPGbsr3iWTeo-QFp_808Y\"\n}"
+      },
+      "headersType": "Form",
+      "uri": {
+        "query": {
+          "delimiter": "&",
+          "items": []
+        },
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:8083",
+        "path": "/api/auth/token/verify"
+      },
+      "id": "ab882afe-cb41-46d5-8485-e5fc4931f3e7",
+      "lastModified": "2019-08-30T07:21:56.484-07:00",
+      "name": "verify token",
+      "headers": [
+        {
+          "enabled": true,
+          "name": "Accept",
+          "value": "application/json"
+        },
+        {
+          "enabled": true,
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaInfo": {},
+      "parentId": "8a61480c-d0cb-411f-a3ca-c99dfe15b1de"
+    },
+    {
+      "type": "Service",
+      "id": "0aaad31b-885f-48c1-be3c-26f67b77dbc6",
+      "lastModified": "2019-09-08T10:40:25.225-07:00",
+      "name": "User"
+    },
+    {
+      "type": "Request",
+      "method": {
+        "requestBody": true,
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+        "name": "POST"
+      },
+      "body": {
+        "formBody": {
+          "overrideContentType": true,
+          "encoding": "application/x-www-form-urlencoded",
+          "items": []
+        },
+        "bodyType": "Text",
+        "autoSetLength": true,
+        "textBody": "{\n  \"name\" : \"jyljyl\",\n  \"username\" : \"jyljyl\",\n  \"email\" : \"jyl@gmail.com\",\n  \"password\" : \"jyljyl\",\n  \"invitationCode\": \"mmKO5brVCJgPjER8fIKyWxwkm0fC9Ns6q40Vra8G363Ow0gpkTSgyN7ris2SIEd4J2OO8kCiHrl3FQIXO2qRZZA1Vc7XSI68ts9Hq6FDFVhrOXez5RudHFljq9CvlFhC\"\n}"
+      },
+      "headersType": "Form",
+      "uri": {
+        "query": {
+          "delimiter": "&",
+          "items": []
+        },
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:8083",
+        "path": "/api/auth/signup"
+      },
+      "id": "c268819b-eff6-41e1-9a75-5e06c76ba0aa",
+      "lastModified": "2019-08-25T19:43:31.126-07:00",
+      "name": "C",
+      "headers": [
+        {
+          "enabled": true,
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "enabled": true,
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "metaInfo": {},
+      "parentId": "0aaad31b-885f-48c1-be3c-26f67b77dbc6"
+    },
+    {
+      "type": "Request",
+      "method": {
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+        "name": "DELETE"
+      },
+      "body": {
+        "formBody": {
+          "overrideContentType": true,
+          "encoding": "application/x-www-form-urlencoded",
+          "items": []
+        },
+        "bodyType": "Text",
+        "autoSetLength": true
+      },
+      "headersType": "Form",
+      "uri": {
+        "query": {
+          "delimiter": "&",
+          "items": []
+        },
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:8083",
+        "path": "/api/auth/user/1/jyljyl"
+      },
+      "id": "09bbae39-b2e9-4324-ad77-5226022a5083",
+      "lastModified": "2019-08-18T18:30:05.349-07:00",
+      "name": "D",
+      "headers": [],
+      "metaInfo": {},
+      "parentId": "0aaad31b-885f-48c1-be3c-26f67b77dbc6"
+    },
+    {
+      "type": "Request",
+      "method": {
+        "requestBody": true,
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+        "name": "POST"
+      },
+      "body": {
+        "formBody": {
+          "overrideContentType": true,
+          "encoding": "application/x-www-form-urlencoded",
+          "items": []
+        },
+        "bodyType": "Text",
+        "autoSetLength": true,
+        "textBody": "{\n  \"name\" : \"ggininder\",\n  \"usernameOrEmail\" : \"ggininder\",\n  \"email\" : \"kelvinlingz@gmail.com\",\n  \"password\" : \"onlyininder\"\n}"
+      },
+      "headersType": "Form",
+      "uri": {
+        "query": {
+          "delimiter": "&",
+          "items": []
+        },
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:8083",
+        "path": "/api/auth/signin"
+      },
+      "id": "d5d40e0e-34af-4026-a8ec-9f19bc8aa316",
+      "lastModified": "2019-09-08T10:40:25.225-07:00",
+      "name": "login",
+      "headers": [
+        {
+          "enabled": true,
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "enabled": true,
+          "name": "Accept",
+          "value": "application/json"
+        }
+      ],
+      "metaInfo": {},
+      "parentId": "0aaad31b-885f-48c1-be3c-26f67b77dbc6"
+    },
+    {
+      "type": "Request",
+      "method": {
+        "requestBody": true,
+        "link": "http://tools.ietf.org/html/rfc7231#section-4.3.4",
+        "name": "PUT"
+      },
+      "body": {
+        "formBody": {
+          "overrideContentType": true,
+          "encoding": "application/x-www-form-urlencoded",
+          "items": []
+        },
+        "bodyType": "Text",
+        "autoSetLength": true,
+        "textBody": "{\n  \n  \"email\" : \"jyl@gmail.com\",\n  \"oldPwd\" : \"123456\",\n  \"newPwd\": \"jyljyl\"\n}"
+      },
+      "headersType": "Form",
+      "uri": {
+        "query": {
+          "delimiter": "&",
+          "items": []
+        },
+        "scheme": {
+          "name": "http",
+          "version": "V11"
+        },
+        "host": "localhost:8083",
+        "path": "/api/auth/user"
+      },
+      "id": "a5f33367-4288-4e36-9712-f449c8bc2be3",
+      "lastModified": "2019-09-06T06:47:07.923-07:00",
+      "name": "reset pwd",
+      "headers": [
+        {
+          "enabled": true,
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "metaInfo": {},
+      "parentId": "0aaad31b-885f-48c1-be3c-26f67b77dbc6"
+    }
+  ]
+}
