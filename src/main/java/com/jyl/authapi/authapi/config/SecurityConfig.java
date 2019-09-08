@@ -71,19 +71,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/",
-                        "/favicon.ico",
-                        "/**/*.png",
-                        "/**/*.gif",
-                        "/**/*.svg",
-                        "/**/*.jpg",
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js")
-                .permitAll() // permitAll() will configure the authorization so that all requests are allowed on that particular path
-                .antMatchers("/api/auth/**")
-                .permitAll()
-                .antMatchers("/api/user/checkUsernameAvailability", "/api/user/checkEmailAvailability")
+                .antMatchers("/api/auth/role/**")
+                .hasAuthority("admin")
+                .antMatchers("/api/auth/code/**")
+                .hasAuthority("admin")
+                .antMatchers("/api/auth/signup", "/api/auth/signin")
                 .permitAll()
                 .anyRequest() // anyRequest().authenticated() 意思是所有request都需要authenticated
                 .authenticated();

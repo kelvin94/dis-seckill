@@ -26,6 +26,9 @@ public class RoleService {
 
     public ApiResponse createNewRole(NewRoleRequest requestParam) throws DataAccessException{
         String result = "";
+        if(roleRepository.existsByRoleName(requestParam.getRoleName())) {
+            return new ApiResponse(false, " role already exists.", HttpStatus.BAD_REQUEST);
+        }
         Role role = new Role();
         role.setRoleName(requestParam.getRoleName());
         Role dbResult = null;

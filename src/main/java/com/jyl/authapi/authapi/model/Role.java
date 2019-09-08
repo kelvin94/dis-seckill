@@ -13,7 +13,11 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "roles")
+@Table(name = "roles", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {
+                "role_name"
+        })
+})
 public class Role {
     @Getter
     @Setter
@@ -50,9 +54,9 @@ public class Role {
 
 
 
-//    public Role(RoleName roleName) {
-//        this.roleName = roleName;
-//    }
+    public Role(String roleName) {
+        this.roleName = roleName;
+    }
 
     public Long getId() {
         return id;

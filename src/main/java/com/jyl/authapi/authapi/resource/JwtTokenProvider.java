@@ -39,6 +39,7 @@ public class JwtTokenProvider {
         final Map<String, Object> claims = new HashMap<>();
         String roleName = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
         claims.put("scope", roleName);
+        claims.put("userId", ((UserPrincipal) authentication.getPrincipal()).getId());
 
         return Jwts.builder()
                 .setSubject(Long.toString(userPrincipal.getId()))
@@ -50,12 +51,11 @@ public class JwtTokenProvider {
     }
 
     public Long getUserIdFromJWT(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody();
 
-        return Long.parseLong(claims.getSubject());
+        Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+        Long userId = ((Integer) claims.get("userId")).longValue();
+
+        return userId;
     }
 
     public String getUserRoleNameFromJWT(String token) {

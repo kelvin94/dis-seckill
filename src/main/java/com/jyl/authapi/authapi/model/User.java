@@ -47,6 +47,8 @@ public class User extends DateAudit {
     @Size(max = 100)
     private String password;
 
+    private String description;
+
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name="ROLE_ID", nullable=false)
 //    private Set<Role> roles = new HashSet<>();
@@ -65,6 +67,14 @@ public class User extends DateAudit {
         this.username = username;
         this.email = email;
         this.password = password;
+    }
+
+    public User(String name, String username, String email, String password, Role role) {
+        this.name = name;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.role = role;
     }
 
     @Override
