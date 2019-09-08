@@ -84,29 +84,29 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public String authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        String result = "";
+    public ResponseEntity<String> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        ResponseEntity<String> result = null;
         try {
             JwtAuthenticationResponse authenticateResult = userService.signIn(loginRequest);
             if(authenticateResult != null && authenticateResult.getAccessToken() != null && !authenticateResult.getAccessToken().isEmpty())
-                result = AuthApiUtil.convertToJson(authenticateResult);
+                result = new ResponseEntity<>(AuthApiUtil.convertToJson(authenticateResult), authenticateResult.getHttpStatus());
 
         } catch (Exception e) {
-            result = AuthApiUtil.convertToJson(new ApiResponse(false, "Unable to authenticate user, error: "+e.getMessage(), HttpStatus.BAD_REQUEST));
+            result = new ResponseEntity<>(AuthApiUtil.convertToJson(new ApiResponse(false, "Unable to authenticate user, error: "+e.getMessage(), HttpStatus.UNAUTHORIZED)), HttpStatus.UNAUTHORIZED);
         }
         return result;
     }
 
     @PostMapping("/signup")
-    public String registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<String> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
         ApiResponse result = new ApiResponse();
 
         try {
             result = userService.registerUser(signUpRequest);
-        } catch(Exception e ){
-            return AuthApiUtil.convertToJson(new ApiResponse(false, "Exception thrown - check the logs", HttpStatus.INTERNAL_SERVER_ERROR));
+        } catch(Exception e ) {
+            return new ResponseEntity<>(AuthApiUtil.convertToJson(new ApiResponse(false, "Exception thrown - check the logs", HttpStatus.INTERNAL_SERVER_ERROR)), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return AuthApiUtil.convertToJson(result);
+        return (result.getSuccess() ? new ResponseEntity<>(AuthApiUtil.convertToJson(result), HttpStatus.OK) : new ResponseEntity<>(AuthApiUtil.convertToJson(result), HttpStatus.BAD_REQUEST));
     }
 
     @PutMapping("/user")
