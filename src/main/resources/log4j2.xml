@@ -7,8 +7,8 @@
         </Console>
 
         <RollingFile name="RollingFile"
-                     fileName="/tmp/seckill-log/authApi.log"
-                     filePattern="/tmp/seckill-log/$${date:yyyy-MM}/authApi-%d{-dd-MMMM-yyyy}-%i.log">
+                     fileName="/tmp/seckill-log/seckill.log"
+                     filePattern="/tmp/seckill-log/$${date:yyyy-MM}/seckill-%d{-dd-MMMM-yyyy}-%i.log">
             <PatternLayout>
                 <pattern>%d %p %C{1.} [%t] %m%n</pattern>
             </PatternLayout>
