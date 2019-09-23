@@ -34,12 +34,15 @@ public class AuthapiApplication {
             Role role = null;
             if(!roleRepository.existsByRoleName("admin")) {
                 role = roleRepository.save(new Role("admin"));
-            }
-            if(role != null) {
-                System.out.println("### role "+ role);
                 if(!userRepository.existsByUsername("ggininder"))
                     userRepository.save(new User("ggininder", "ggininder", "kelvinlingz@gmail.com", passwordEncoder.encode(pwd), role));
+            }
 
+            role = null;
+            if(!roleRepository.existsByRoleName("pedestrian")) {
+                role = roleRepository.save(new Role("pedestrian"));
+                if(!userRepository.existsByUsername("pedestrian"))
+                    userRepository.save(new User("pedestrian", "pedestrian", "pedestrian@gmail.com", passwordEncoder.encode(pwd), role));
             }
         };
     }

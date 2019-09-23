@@ -63,20 +63,24 @@ public class JwtTokenProvider {
         return (String) claims.get("scope");
     }
 
-    public boolean validateToken(String authToken) {
+    public boolean validateToken(String authToken) throws Exception {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException ex) {
-            logger.error("Invalid JWT signature");
+            logger.error("Invalid JWT signature, given token: " + authToken);
+            throw ex;
         } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token");
+            logger.error("Invalid JWT token, given token: " + authToken);
+            throw ex;
         } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token");
+            logger.error("Expired JWT token, given token: " + authToken);
+            throw ex;
         } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token");
+            logger.error("Unsupported JWT token, given token: " + authToken);
         } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty.");
+            logger.error("JWT claims string is empty, given token: " + authToken);
+            throw ex;
         }
         return false;
     }

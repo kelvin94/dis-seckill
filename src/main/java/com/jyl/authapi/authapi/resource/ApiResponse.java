@@ -11,6 +11,7 @@ public class ApiResponse {
     private String message;
     private String code;
     private HttpStatus httpStatus;
+    private String roleName;
 
     public ApiResponse(Boolean success, String message) {
         this.success = success;

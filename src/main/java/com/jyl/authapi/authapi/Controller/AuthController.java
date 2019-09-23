@@ -12,6 +12,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
@@ -36,11 +38,16 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @PostMapping("/token/verify")
-    public String verifyToken(@Valid @RequestBody TokenVerificationReq tokenVerificationReq) {
-        String result = tokenService.verifyToken(tokenVerificationReq);
+    @GetMapping("/token/verify")
+    public String verifyToken(@RequestHeader("Authorization") String token, HttpServletRequest request) {
+        if(token.isEmpty() || !token.substring(0, 6).equalsIgnoreCase("Bearer")) {
+            logger.error("Empty token passed in, incoming request source ip: "+ request.getRemoteAddr() + ". and x-forwarded-for http header, list of proxy ips: "+ request.getHeader("X-FORWARDED-FOR"));
+            return AuthApiUtil.convertToJson(new ApiResponse(false, "Empty token", HttpStatus.BAD_REQUEST));
+        }
+        String result = tokenService.verifyToken(token.substring(6));
         if(result.isEmpty()) {
-            return AuthApiUtil.convertToJson(new ApiResponse(false, "Invalid token"));
+            logger.error("Invalid token passed in: " + token + " incoming request source ip: "+ request.getRemoteAddr() + ". and x-forwarded-for http header, list of proxy ips: "+ request.getHeader("X-FORWARDED-FOR"));
+            return AuthApiUtil.convertToJson(new ApiResponse(false, "Invalid token", HttpStatus.BAD_REQUEST));
         }
         return result;
     }

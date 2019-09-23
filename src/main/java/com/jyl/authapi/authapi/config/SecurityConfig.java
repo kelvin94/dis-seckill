@@ -71,6 +71,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
+                .antMatchers("/api/auth/token/verify")
+                .hasAuthority("pedestrian")
                 .antMatchers("/api/auth/role/**")
                 .hasAuthority("admin")
                 .antMatchers("/api/auth/code/**")
