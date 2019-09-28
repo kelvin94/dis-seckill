@@ -24,11 +24,11 @@ public class TokenService {
         try {
             isValidToken = tokenProvider.validateToken(token);
         } catch (Exception ex) {
-            result = AuthApiUtil.convertToJson(new ApiResponse(true, ex.getMessage(), HttpStatus.OK));
+            result = AuthApiUtil.convertToJson(new ApiResponse(true, ex.getMessage(), HttpStatus.BAD_REQUEST));
         }
         if(isValidToken) {
             String roleName = tokenProvider.getUserRoleNameFromJWT(token);
-            result = AuthApiUtil.convertToJson(new ApiResponse(true, roleName, HttpStatus.OK));
+            result = AuthApiUtil.convertToJson(new ApiResponse(true, HttpStatus.OK, roleName));
         }
         return result;
     }

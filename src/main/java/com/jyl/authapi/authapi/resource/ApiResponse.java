@@ -24,6 +24,12 @@ public class ApiResponse {
         this.httpStatus = httpStatus;
     }
 
+    public ApiResponse(Boolean success, HttpStatus httpStatus,  String roleName) {
+        this.success = success;
+        this.httpStatus = httpStatus;
+        this.roleName = roleName;
+    }
+
     public ApiResponse(Boolean success, String message, HttpStatus httpStatus, String code) {
         this.success = success;
         this.message = message;
