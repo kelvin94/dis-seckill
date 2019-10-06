@@ -6,6 +6,7 @@
         <groupId>com.jyl.portfolio</groupId>
         <artifactId>commons</artifactId>
         <version>1.0-SNAPSHOT</version>
+        <relativePath>../Commons</relativePath>
     </parent>
     <artifactId>authApi</artifactId>
     <version>0.0.1-production-candidate</version>

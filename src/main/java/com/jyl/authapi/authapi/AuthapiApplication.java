@@ -14,8 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
 public class AuthapiApplication {
-        @Value("${app.adminpassword}")
-        private String pwd;
+
         @Autowired
         private UserRepository userRepository;
         @Autowired
@@ -26,23 +25,36 @@ public class AuthapiApplication {
         public static void main(String[] args) {
 
             SpringApplication.run(AuthapiApplication.class, args);
-        }
 
+        }
+    @Value("${app.adminpassword}")
+    private String pwd;
+    @Value("${app.adminusername}")
+    private String username;
+    @Value("${app.pedestrianusername}")
+    private String pedestrianUsername;
+    @Value("${app.pedestrianpassword}")
+    private String pedestrianPassword;
     @Bean
     InitializingBean sendDatabase() {
         return () -> {
+            System.out.println("###${app.adminusername} " + username);
+            System.out.println("###${app.adminpassword} " + pwd);
+            System.out.println("###${app.pedestrianUsername} " + pedestrianUsername);
+            System.out.println("###${app.pedestrianpassword} " + pedestrianPassword);
+
             Role role = null;
             if(!roleRepository.existsByRoleName("admin")) {
                 role = roleRepository.save(new Role("admin"));
-                if(!userRepository.existsByUsername("ggininder"))
-                    userRepository.save(new User("ggininder", "ggininder", "kelvinlingz@gmail.com", passwordEncoder.encode(pwd), role));
+                if(!userRepository.existsByUsername(username))
+                    userRepository.save(new User(username, username, "kelvinlingz@gmail.com", passwordEncoder.encode(pwd), role));
             }
 
             role = null;
             if(!roleRepository.existsByRoleName("pedestrian")) {
                 role = roleRepository.save(new Role("pedestrian"));
-                if(!userRepository.existsByUsername("pedestrian"))
-                    userRepository.save(new User("pedestrian", "pedestrian", "pedestrian@gmail.com", passwordEncoder.encode(pwd), role));
+                if(!userRepository.existsByUsername(pedestrianUsername))
+                    userRepository.save(new User(pedestrianUsername, pedestrianUsername, "pedestrian@gmail.com", passwordEncoder.encode(pedestrianPassword), role));
             }
         };
     }
