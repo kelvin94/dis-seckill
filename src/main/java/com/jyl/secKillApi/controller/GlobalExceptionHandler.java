@@ -1,23 +1,17 @@
 package com.jyl.secKillApi.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jyl.secKillApi.execptions.RepeatkillException;
 import com.jyl.secKillApi.execptions.SeckillCloseException;
 import com.jyl.secKillApi.execptions.SeckillException;
-import com.jyl.secKillApi.stateenum.SeckillStateEnum;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.List;
-import java.util.Objects;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -30,6 +24,7 @@ public class GlobalExceptionHandler {
         logger.debug("#handleRepeatkillException");
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+        logger.error(ex.getMessage());
 
         return new ResponseEntity<String>(ex.getMessage(), responseHeaders, HttpStatus.BAD_REQUEST);
     }
@@ -40,6 +35,7 @@ public class GlobalExceptionHandler {
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+        logger.error(ex.getMessage());
 
         return new ResponseEntity<String>(ex.getMessage(), responseHeaders, HttpStatus.BAD_REQUEST);
     }
@@ -50,15 +46,26 @@ public class GlobalExceptionHandler {
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+        logger.error(ex.getMessage());
 
         return new ResponseEntity<String>(ex.getMessage(), responseHeaders, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({JsonProcessingException.class})
+    public ResponseEntity handleJsonProcessingException(JsonProcessingException ex) {
+        logger.debug("#handleJsonProcessingException");
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+        logger.error(ex.getMessage());
+
+        return new ResponseEntity<String>(ex.getMessage(), responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // General ExceptionHandler class
     @ExceptionHandler({Exception.class})
     public ResponseEntity handleGeneralException(Exception ex) {
         logger.debug("#handleGeneralException");
-
+        logger.error(ex.getMessage());
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setContentType(MediaType.APPLICATION_JSON);
 

@@ -2,8 +2,10 @@ package com.jyl.secKillApi.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class UrlExposer {
+public class UrlExposer implements Serializable {
 
     private Boolean isExposed; // 是否开启秒杀
 
@@ -35,5 +37,17 @@ public class UrlExposer {
     public UrlExposer(boolean isExposed, long seckillSwagId) {
         this.isExposed = isExposed;
         this.seckillSwagId = seckillSwagId;
+    }
+
+    @Override
+    public String toString() {
+        return "UrlExposer{" +
+                "isExposed=" + isExposed +
+                ", md5Url='" + md5Url + '\'' +
+                ", seckillSwagId=" + seckillSwagId +
+                ", dealStart=" + dealStart +
+                ", dealEnd=" + dealEnd +
+                ", now=" + now +
+                '}';
     }
 }

@@ -3,12 +3,8 @@ package com.jyl.secKillApi.service;
 import com.jyl.secKillApi.dto.SeckillExecution;
 import com.jyl.secKillApi.dto.UrlExposer;
 import com.jyl.secKillApi.entity.SeckillSwag;
-import com.jyl.secKillApi.execptions.RepeatkillException;
-import com.jyl.secKillApi.execptions.SeckillCloseException;
-import com.jyl.secKillApi.execptions.SeckillException;
 import com.jyl.secKillApi.resource.SeckillParameter;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface SeckillService {
@@ -37,11 +33,11 @@ public interface SeckillService {
      */
     UrlExposer exportSeckillUrl(Long seckillId);
 
-    /**
-     * 执行秒杀的操作
-     *
-     * @param requestParam
-     */
+        /**
+         * 执行秒杀的操作
+         *
+         * @param requestParam
+         */
     SeckillExecution executeSeckill(SeckillParameter requestParam)
             throws Exception;
 }

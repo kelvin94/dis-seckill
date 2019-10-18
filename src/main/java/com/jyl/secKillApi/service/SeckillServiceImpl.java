@@ -1,9 +1,8 @@
 package com.jyl.secKillApi.service;
 
+import com.google.gson.Gson;
 import com.jyl.secKillApi.dto.SeckillExecution;
 import com.jyl.secKillApi.dto.UrlExposer;
-import com.jyl.secKillApi.entity.SeckillOrder;
-import com.jyl.secKillApi.entity.SeckillOrderPrimaryKey;
 import com.jyl.secKillApi.entity.SeckillSwag;
 import com.jyl.secKillApi.execptions.RepeatkillException;
 import com.jyl.secKillApi.execptions.SeckillCloseException;
@@ -14,17 +13,14 @@ import com.jyl.secKillApi.resource.SeckillParameter;
 import com.jyl.secKillApi.stateenum.SeckillStateEnum;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
-import javax.swing.text.html.Option;
 import java.math.BigDecimal;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -33,15 +29,21 @@ import java.util.Optional;
 @Service
 public class SeckillServiceImpl implements SeckillService {
     private static Logger logger = LogManager.getLogger(SeckillServiceImpl.class.getSimpleName());
+    private final Gson gson;
     private final SwagRepository swagRepository;
     private final OrderRepository orderRepository;
+    private final JedisPool jedisPool;
     private final String salt = "randomsalt555";
     public SeckillServiceImpl(
             SwagRepository swagRepository,
-            OrderRepository orderRepository
+            OrderRepository orderRepository,
+            JedisPool jedisPool,
+            Gson gson
     ) {
         this.swagRepository = swagRepository;
         this.orderRepository = orderRepository;
+        this.jedisPool = jedisPool;
+        this.gson = gson;
     }
 
     @Override
@@ -57,21 +59,64 @@ public class SeckillServiceImpl implements SeckillService {
 
     @Override
     public UrlExposer exportSeckillUrl(Long seckillSwagId) {
+
+        /*
+            Redis key for swag id: "url:" + seckillSwagId
+         */
+
+        // get jedis connection from connection pool
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            // check if the key(swag id) is in redis, if exists, decompose the json convert it back to POJO
+            if(jedis.exists(getRedisKey(seckillSwagId))) {
+                String redis_value = jedis.get(getRedisKey(seckillSwagId));
+                return gson.fromJson(redis_value, UrlExposer.class);
+            }
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
+        } finally {
+            // return the jedis resource back to the resource pool
+            if(jedis != null)
+                jedis.close();
+        }
+
+
+
+        // not in the cache then continue with the normal postgres call and store the url in redis as a json
+        logger.info("#.....generating url.. seckillSwagId " + seckillSwagId);
+
         Optional<SeckillSwag> swag = swagRepository.findBySeckillSwagId(seckillSwagId);
         if(swag.isPresent()) {
             //generate md5SwagId
            String md5SwagId = getMd5(swag.get().getSeckillSwagId());
-           logger.debug("# md5 url " + md5SwagId);
-           Date startTs = swag.get().getStartTime();
+            logger.debug("#.....md5 hashed url " + md5SwagId);
+
+            Date startTs = swag.get().getStartTime();
             Date endTs =  swag.get().getEndTime();
             Date now = new Date();
             long stock = swag.get().getStockCount();
             if(stock > 0 && now.getTime() > startTs.getTime() && now.getTime() < endTs.getTime()) {
-                return new UrlExposer(true, md5SwagId, swag.get().getSeckillSwagId());
+                UrlExposer returnValue = new UrlExposer(true, md5SwagId, swag.get().getSeckillSwagId());
+                String str_returnValue = gson.toJson(returnValue);
+                try{
+                    jedis = jedisPool.getResource();
+                    jedis.set(getRedisKey(seckillSwagId), str_returnValue);
+                } catch (Exception ex) {
+                    logger.error(ex.getMessage());
+                } finally {
+                    // return the jedis resource back to the resource pool
+                    if(jedis != null)
+                        jedis.close();
+                }
             }
             return new UrlExposer(false, swag.get().getSeckillSwagId());
         }
         return null;
+    }
+
+    private String getRedisKey(Long seckillSwagId) {
+        return "url:"+seckillSwagId;
     }
 
     private String getMd5(long seckillSwagId) {

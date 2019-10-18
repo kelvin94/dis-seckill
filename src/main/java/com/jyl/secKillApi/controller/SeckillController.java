@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jyl.secKillApi.dto.SeckillExecution;
 import com.jyl.secKillApi.dto.UrlExposer;
 import com.jyl.secKillApi.entity.SeckillSwag;
-import com.jyl.secKillApi.repository.SwagRepository;
 import com.jyl.secKillApi.resource.SeckillParameter;
 import com.jyl.secKillApi.service.SeckillService;
 import com.jyl.secKillApi.util.GeneralUtil;
@@ -12,12 +11,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -29,11 +25,16 @@ public class SeckillController {
     private final SeckillService seckillService;
 
     public SeckillController(
-            SeckillService seckillService
-    ) {
+            SeckillService seckillService) {
         this.seckillService = seckillService;
     }
 
+
+
+//    @RequestMapping(path = "/cache/clear", method = RequestMethod.GET)
+//    public void clearCache() {
+//        cacheService.clearCache();
+//    }
 
     @RequestMapping(path = "/swags", method = RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public String showAllSwagsController() throws JsonProcessingException {
@@ -63,6 +64,16 @@ public class SeckillController {
             logger.error(ex.getMessage());
         }
         return null;
+    }
+
+    @GetMapping(path = "/testing")
+    public void testing() {
+
+
+            UrlExposer non_cachedResult = seckillService.exportSeckillUrl(2L);
+            logger.info("updated cached "+ non_cachedResult);
+
+
     }
 
     @RequestMapping(path = "/swags/{seckillSwagId}/expose", method = RequestMethod.GET, produces =  MediaType.APPLICATION_JSON_VALUE)
