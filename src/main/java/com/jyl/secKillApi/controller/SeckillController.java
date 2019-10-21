@@ -66,16 +66,6 @@ public class SeckillController {
         return null;
     }
 
-    @GetMapping(path = "/testing")
-    public void testing() {
-
-
-            UrlExposer non_cachedResult = seckillService.exportSeckillUrl(2L);
-            logger.info("updated cached "+ non_cachedResult);
-
-
-    }
-
     @RequestMapping(path = "/swags/{seckillSwagId}/expose", method = RequestMethod.GET, produces =  MediaType.APPLICATION_JSON_VALUE)
     public String exposeSwag(@PathVariable(value = "seckillSwagId", required = true) Long seckillSwagId) {
         UrlExposer result = seckillService.exportSeckillUrl(seckillSwagId);

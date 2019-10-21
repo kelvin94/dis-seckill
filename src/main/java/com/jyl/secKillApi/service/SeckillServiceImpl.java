@@ -59,7 +59,7 @@ public class SeckillServiceImpl implements SeckillService {
 
     @Override
     public UrlExposer exportSeckillUrl(Long seckillSwagId) {
-
+        logger.info("Begin exportSeckillUrl...");
         /*
             Redis key for swag id: "url:" + seckillSwagId
          */
@@ -70,6 +70,7 @@ public class SeckillServiceImpl implements SeckillService {
             jedis = jedisPool.getResource();
             // check if the key(swag id) is in redis, if exists, decompose the json convert it back to POJO
             if(jedis.exists(getRedisKey(seckillSwagId))) {
+                logger.info("Seckill product exists in Redis. Returning obj in redis.");
                 String redis_value = jedis.get(getRedisKey(seckillSwagId));
                 return gson.fromJson(redis_value, UrlExposer.class);
             }
@@ -77,6 +78,7 @@ public class SeckillServiceImpl implements SeckillService {
             logger.error(ex.getMessage());
         } finally {
             // return the jedis resource back to the resource pool
+            logger.info("closeing redis connection and return resource back to the resource pool");
             if(jedis != null)
                 jedis.close();
         }
@@ -88,16 +90,18 @@ public class SeckillServiceImpl implements SeckillService {
 
         Optional<SeckillSwag> swag = swagRepository.findBySeckillSwagId(seckillSwagId);
         if(swag.isPresent()) {
+            logger.info("Found swag from postgres.");
             //generate md5SwagId
            String md5SwagId = getMd5(swag.get().getSeckillSwagId());
-            logger.debug("#.....md5 hashed url " + md5SwagId);
+            logger.info("md5 hashed url " + md5SwagId);
 
             Date startTs = swag.get().getStartTime();
             Date endTs =  swag.get().getEndTime();
             Date now = new Date();
-            long stock = swag.get().getStockCount();
-            if(stock > 0 && now.getTime() > startTs.getTime() && now.getTime() < endTs.getTime()) {
-                UrlExposer returnValue = new UrlExposer(true, md5SwagId, swag.get().getSeckillSwagId());
+            int currentStockCount = swag.get().getStockCount();
+            if(currentStockCount > 0 && now.getTime() > startTs.getTime() && now.getTime() < endTs.getTime()) {
+                logger.info("Sales is happening.. current stock count="+currentStockCount + " swagID="+seckillSwagId);
+                UrlExposer returnValue = new UrlExposer(true, md5SwagId, swag.get().getSeckillSwagId(), currentStockCount);
                 String str_returnValue = gson.toJson(returnValue);
                 try{
                     jedis = jedisPool.getResource();
@@ -109,6 +113,7 @@ public class SeckillServiceImpl implements SeckillService {
                     if(jedis != null)
                         jedis.close();
                 }
+                return returnValue;
             }
             return new UrlExposer(false, swag.get().getSeckillSwagId());
         }
@@ -116,7 +121,7 @@ public class SeckillServiceImpl implements SeckillService {
     }
 
     private String getRedisKey(Long seckillSwagId) {
-        return "url:"+seckillSwagId;
+        return "swagUrl:"+seckillSwagId;
     }
 
     private String getMd5(long seckillSwagId) {
@@ -145,7 +150,7 @@ public class SeckillServiceImpl implements SeckillService {
                 long remainingStockCount = swag.get().getStockCount();
                 logger.debug("# 剩余库存 " + remainingStockCount);
                 if (remainingStockCount <= 0) {
-                    throw new SeckillCloseException("卖完啦洗洗睡吧.");
+                    throw new SeckillCloseException("Sold out. 卖完啦洗洗睡吧.");
                 } else {
                     // 减库存
                     remainingStockCount -= 1;

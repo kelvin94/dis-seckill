@@ -3,11 +3,10 @@ package com.jyl.secKillApi.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
-
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -51,5 +50,5 @@ public class SeckillSwag implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT-8")
     private Date endTime; //秒杀结束时间
 
-    private long stockCount; //剩余库存数量
+    private int stockCount; //剩余库存数量
 }

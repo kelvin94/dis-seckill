@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class SeckillParameter {
     private Long seckillSwagId;
     private BigDecimal dealPrice;

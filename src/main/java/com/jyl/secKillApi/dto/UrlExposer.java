@@ -1,5 +1,6 @@
 package com.jyl.secKillApi.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,25 +14,29 @@ public class UrlExposer implements Serializable {
     private String md5Url;
 
     private Long seckillSwagId;
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long dealStart; // 秒杀时间开始
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long dealEnd;
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long now; // current utc time
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private int stockCount;
 
-    public UrlExposer(boolean isExposed, String md5Url, long seckillSwagId) {
+    public UrlExposer(boolean isExposed, String md5Url, long seckillSwagId, int stockCount) {
         this.isExposed = isExposed;
         this.md5Url = md5Url;
         this.seckillSwagId = seckillSwagId;
+        this.stockCount = stockCount;
     }
 
-    public UrlExposer(boolean isExposed, Long seckillSwagId, long now, long dealStart, long dealEnd) {
+    public UrlExposer(boolean isExposed, Long seckillSwagId, long now, long dealStart, long dealEnd, int stockCount) {
         this.isExposed = isExposed;
         this.seckillSwagId = seckillSwagId;
         this.now = now;
         this.dealStart = dealStart;
         this.dealEnd = dealEnd;
+        this.stockCount = stockCount;
     }
 
     public UrlExposer(boolean isExposed, long seckillSwagId) {
