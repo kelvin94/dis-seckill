@@ -31,7 +31,6 @@ public class RedisConfiguration {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(REDIS_HOSTNAME, REDIS_PORT);
         redisStandaloneConfiguration.setPassword(RedisPassword.none());
         return new JedisConnectionFactory(redisStandaloneConfiguration);
-
     }
 
     @Bean
@@ -44,6 +43,8 @@ public class RedisConfiguration {
     @Bean
     public JedisPool jedisPool() {
         final JedisPoolConfig poolConfig = new JedisPoolConfig();
+        logger.info("JedisPoolConfig Injection begins...注入开始: ");
+
         poolConfig.setMaxTotal(10);
         poolConfig.setMaxIdle(10);
         poolConfig.setMinIdle(2);
