@@ -5,11 +5,11 @@ import com.jyl.secKillApi.stateenum.SeckillStateEnum;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
-public class SeckillExecution {
+public class SeckillExecution implements Serializable {
     private Long seckillSwagId;
     private int state;
     private Long userPhone;

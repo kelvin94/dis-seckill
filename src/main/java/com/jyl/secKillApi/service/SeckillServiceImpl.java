@@ -3,6 +3,7 @@ package com.jyl.secKillApi.service;
 import com.google.gson.Gson;
 import com.jyl.secKillApi.dto.SeckillExecution;
 import com.jyl.secKillApi.dto.UrlExposer;
+import com.jyl.secKillApi.entity.SeckillOrder;
 import com.jyl.secKillApi.entity.SeckillSwag;
 import com.jyl.secKillApi.execptions.RepeatkillException;
 import com.jyl.secKillApi.execptions.SeckillCloseException;
@@ -69,9 +70,9 @@ public class SeckillServiceImpl implements SeckillService {
         try {
             jedis = jedisPool.getResource();
             // check if the key(swag id) is in redis, if exists, decompose the json convert it back to POJO
-            if(jedis.exists(getRedisKey(seckillSwagId))) {
+            if(jedis.exists(getUrlRedisKey(seckillSwagId))) {
                 logger.info("Seckill product exists in Redis. Returning obj in redis.");
-                String redis_value = jedis.get(getRedisKey(seckillSwagId));
+                String redis_value = jedis.get(getUrlRedisKey(seckillSwagId));
                 return gson.fromJson(redis_value, UrlExposer.class);
             }
         } catch (Exception ex) {
@@ -91,9 +92,9 @@ public class SeckillServiceImpl implements SeckillService {
         Optional<SeckillSwag> swag = swagRepository.findBySeckillSwagId(seckillSwagId);
         if(swag.isPresent()) {
             logger.info("Found swag from postgres.");
-            //generate md5SwagId
-           String md5SwagId = getMd5(swag.get().getSeckillSwagId());
-            logger.info("md5 hashed url " + md5SwagId);
+            //generate md5Url
+           String md5Url = getMd5(swag.get().getSeckillSwagId());
+            logger.info("md5 hashed url " + md5Url);
 
             Date startTs = swag.get().getStartTime();
             Date endTs =  swag.get().getEndTime();
@@ -101,11 +102,14 @@ public class SeckillServiceImpl implements SeckillService {
             int currentStockCount = swag.get().getStockCount();
             if(currentStockCount > 0 && now.getTime() > startTs.getTime() && now.getTime() < endTs.getTime()) {
                 logger.info("Sales is happening.. current stock count="+currentStockCount + " swagID="+seckillSwagId);
-                UrlExposer returnValue = new UrlExposer(true, md5SwagId, swag.get().getSeckillSwagId(), currentStockCount);
+                UrlExposer returnValue = new UrlExposer(
+                        true, md5Url, swag.get().getSeckillSwagId(),
+                        currentStockCount, swag.get().getStartTime().getTime(), swag.get().getEndTime().getTime(), swag.get().getSeckill_price());
+
                 String str_returnValue = gson.toJson(returnValue);
                 try{
                     jedis = jedisPool.getResource();
-                    jedis.set(getRedisKey(seckillSwagId), str_returnValue);
+                    jedis.set(getUrlRedisKey(seckillSwagId), str_returnValue);
                 } catch (Exception ex) {
                     logger.error(ex.getMessage());
                 } finally {
@@ -120,8 +124,14 @@ public class SeckillServiceImpl implements SeckillService {
         return null;
     }
 
-    private String getRedisKey(Long seckillSwagId) {
+    private String getUrlRedisKey(Long seckillSwagId) {
         return "swagUrl:"+seckillSwagId;
+    }
+
+
+
+    private String getSeckillOrderRedisKey(Long userPhone, Long seckillSwagId) {
+        return "swagOrder:"+seckillSwagId+":"+userPhone;
     }
 
     private String getMd5(long seckillSwagId) {
@@ -133,54 +143,85 @@ public class SeckillServiceImpl implements SeckillService {
     @Transactional(rollbackFor = Exception.class) // roll back if any exception is thrown
     public SeckillExecution executeSeckill(SeckillParameter requestParam) throws Exception {
         Long seckillSwagId = requestParam.getSeckillSwagId();
-        BigDecimal dealPrice = requestParam.getDealPrice();
         Long userPhone = requestParam.getUserPhone();
         String md5Url = requestParam.getMd5Url();
 
         if (md5Url == null || !md5Url.equalsIgnoreCase(getMd5(seckillSwagId))) {
             throw new SeckillException("seckill data is tampered. hashed result is different.");
         }
-
+        Jedis jedis = null;
         try {
-            Optional<SeckillSwag> swag = swagRepository.findBySeckillSwagId(seckillSwagId);
+            // check if a SeckillOrder that contains the same phoneNumber and seckillSwagId existing in redis
+            // 如果已经存在就避免重复击杀
+            // 不存在就存入redis
+            String str_order = null;
+            try {
+                jedis = jedisPool.getResource();
+                str_order = jedis.get(getSeckillOrderRedisKey(userPhone, seckillSwagId));
+                logger.info("完成从redis读取SeckillOrder: "+str_order);
+            } finally {
+                if(jedis!=null) {
+                    logger.info("Redis conn close");
+                    jedis.close();
+                }
+            }
+            long remainingStockCount = 0;
+            BigDecimal seckill_price = null;
+            long dealStartTs = 0;
+            long dealEndTs = 0;
 
-            Date currentSysTime = new Date();
-            if(swag.isPresent() && currentSysTime.compareTo(swag.get().getStartTime()) > 0 && currentSysTime.compareTo(swag.get().getEndTime()) < 0 ) {
-                logger.debug("# get into the if statement (should NOT see this)");
-                long remainingStockCount = swag.get().getStockCount();
-                logger.debug("# 剩余库存 " + remainingStockCount);
+            if(str_order != null) {
+                SeckillOrder order = gson.fromJson(str_order, SeckillOrder.class);
+                logger.info("Seckill order exists in redis. 重复购买。");
+                throw new RepeatkillException("Your order already placed.");
+            } else {
+                try {
+                    // Non-repeated purchase - Update Redis Url with new stockCount
+                    jedis = jedisPool.getResource();
+                    String seckill_url = jedis.get(getUrlRedisKey(seckillSwagId));
+                    UrlExposer url = gson.fromJson(seckill_url, UrlExposer.class);
+                    if(url != null && url.getStockCount() > 0) {
+                        url.setStockCount(url.getStockCount() - 1 );
+                        remainingStockCount = url.getStockCount();
+                        dealStartTs = url.getDealStart();
+                        dealEndTs = url.getDealEnd();
+                        seckill_price = url.getSeckill_price();
+                    }
+                } finally {
+                    if(jedis!=null)
+                        jedis.close();
+                }
+                logger.info("剩余库存 " + remainingStockCount);
+                logger.info("(Redis) 完成更新库存");
                 if (remainingStockCount <= 0) {
                     throw new SeckillCloseException("Sold out. 卖完啦洗洗睡吧.");
-                } else {
+                }
+                Date currentSysTime = new Date();
+                if(currentSysTime.getTime() > dealStartTs && currentSysTime.getTime() < dealEndTs ) {
+
                     // 减库存
-                    remainingStockCount -= 1;
                     int updatedRows = swagRepository.updateStockCount(remainingStockCount, seckillSwagId);
-                    logger.debug("#完成更新库存");
+                    logger.info("(Postgres) 完成更新库存");
                     if (updatedRows != 1) {
                         throw new Exception("Somethings wrong...Updated more than 1 swag's stock_count.");
                     }
                     int state = 1;
                     try {
-                        orderRepository.insertOder(swag.get().getSeckillSwagId(), swag.get().getSeckill_price(), userPhone, state);
-                        logger.debug("######finish insertion");
+                        jedis = jedisPool.getResource();
+                        SeckillOrder order = new SeckillOrder(seckillSwagId, seckill_price, userPhone, state);
+                        jedis.set(getSeckillOrderRedisKey(userPhone, seckillSwagId), gson.toJson(order));
+                        logger.info("(Redis) 更新order完笔");
+                        orderRepository.insertOder(seckillSwagId, seckill_price, userPhone, state);
+                        logger.info("(Postgres) 更新Order完毕");
                     }  catch( DataIntegrityViolationException ex) {
-                        logger.debug("######get into DataIntegrityViolationException");
+                        logger.error(ex.getMessage());
                         throw new RepeatkillException(Objects.requireNonNull(SeckillStateEnum.stateOf(-1)).getStateInfo());
+                    } finally {
+                        if(jedis!=null)
+                            jedis.close();
                     }
 
-                    return new SeckillExecution(swag.get().getSeckillSwagId(), 1, Objects.requireNonNull(SeckillStateEnum.stateOf(1)).getStateInfo());
-
-                    //                    SeckillOrder order = new SeckillOrder();
-                    //                    SeckillOrderPrimaryKey orderId = new SeckillOrderPrimaryKey();
-                    //                    orderId.setSeckillSwagId(swag.get().getSeckillSwagId());
-                    //                    orderId.setUserPhone(userPhone);
-                    //                    order.setOrderId(orderId);
-                    ////                    order.setSeckillSwagId(swag.get().getSeckillSwagId());
-                    //                    order.setTotal(swag.get().getSeckill_price());
-                    ////                    order.setUserPhone(userPhone);
-                    //                    order.setState(state);
-                    //                    SeckillOrder returnedInstance = orderRepository.save(order);
-
+                    return new SeckillExecution(seckillSwagId, 1, Objects.requireNonNull(SeckillStateEnum.stateOf(1)).getStateInfo());
                 }
 
             }
@@ -195,7 +236,6 @@ public class SeckillServiceImpl implements SeckillService {
             logger.error("##userPhone: " + userPhone + " " + ex.getMessage());
             throw new SeckillException(ex.getMessage());
         }
-        logger.debug("# return null (should see this)");
         return null;
     }
 }

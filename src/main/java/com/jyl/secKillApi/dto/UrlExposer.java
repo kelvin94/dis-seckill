@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 public class UrlExposer implements Serializable {
@@ -22,12 +23,17 @@ public class UrlExposer implements Serializable {
     private Long now; // current utc time
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private int stockCount;
+    private BigDecimal seckill_price; //商品秒杀价格
 
-    public UrlExposer(boolean isExposed, String md5Url, long seckillSwagId, int stockCount) {
+
+    public UrlExposer(boolean isExposed, String md5Url, long seckillSwagId, int stockCount, long dealStart, long dealEnd, BigDecimal seckill_price) {
         this.isExposed = isExposed;
         this.md5Url = md5Url;
         this.seckillSwagId = seckillSwagId;
         this.stockCount = stockCount;
+        this.dealStart = dealStart;
+        this.dealEnd = dealEnd;
+        this.seckill_price = seckill_price;
     }
 
     public UrlExposer(boolean isExposed, Long seckillSwagId, long now, long dealStart, long dealEnd, int stockCount) {

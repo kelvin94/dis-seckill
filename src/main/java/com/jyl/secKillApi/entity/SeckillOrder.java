@@ -33,4 +33,13 @@ public class SeckillOrder implements Serializable {
     private int state; //订单状态， -1:无效 0:成功 1:已付款
     @Transient
     private SeckillSwag secKillSwag; //秒杀商品，和订单是一对多的关系
+
+    public SeckillOrder(Long seckillSwagId, BigDecimal seckill_price, Long userPhone, int state) {
+        SeckillOrderPrimaryKey temp = new SeckillOrderPrimaryKey();
+        temp.setSeckillSwagId(seckillSwagId);
+        temp.setUserPhone(userPhone);
+        this.orderId = temp;
+        this.state = state;
+        this.total = seckill_price;
+    }
 }

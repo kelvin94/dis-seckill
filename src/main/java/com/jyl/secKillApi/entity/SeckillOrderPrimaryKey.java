@@ -8,10 +8,10 @@ import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
-@Data
 @NoArgsConstructor
 @EqualsAndHashCode
 @Embeddable
+@Data
 public class SeckillOrderPrimaryKey implements Serializable {
     @NotNull
     private long seckillSwagId;
