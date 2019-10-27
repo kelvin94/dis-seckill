@@ -22,6 +22,7 @@ import org.springframework.util.DigestUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -32,6 +33,7 @@ public class SeckillServiceImpl implements SeckillService {
     private static Logger logger = LogManager.getLogger(SeckillServiceImpl.class.getSimpleName());
     private final Gson gson;
     private final SwagRepository swagRepository;
+    private final OrderRepository orderRepository;
     private final MQProducer mqProducer;
     private final JedisPool jedisPool;
     private final String salt = "randomsalt555";
@@ -43,6 +45,7 @@ public class SeckillServiceImpl implements SeckillService {
             MQProducer mqProducer
     ) {
         this.swagRepository = swagRepository;
+        this.orderRepository = orderRepository;
         this.jedisPool = jedisPool;
         this.gson = gson;
         this.mqProducer = mqProducer;
@@ -132,14 +135,13 @@ public class SeckillServiceImpl implements SeckillService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class) // roll back if any exception is thrown
     public SeckillExecution executeSeckill(SeckillParameter requestParam) throws Exception {
         Long seckillSwagId = requestParam.getSeckillSwagId();
         Long userPhone = requestParam.getUserPhone();
         String md5Url = requestParam.getMd5Url();
 
         if (md5Url == null || !md5Url.equalsIgnoreCase(getMd5(seckillSwagId))) {
-            throw new SeckillException("seckill data is tampered. hashed result is different.");
+            throw new SeckillException("seckill data is tampered. hashed url result is different.");
         }
         Jedis jedis = null;
         try {
@@ -169,7 +171,7 @@ public class SeckillServiceImpl implements SeckillService {
                 SeckillMsgBody msg = new SeckillMsgBody(seckillSwagId, userPhone);
                     // // 进入待秒杀队列，进行后续串行操作
                     mqProducer.jianku_send(msg);
-
+                    // 立即返回给客户端，说明秒杀成功了
                     return new SeckillExecution(seckillSwagId, 1, Objects.requireNonNull(SeckillStateEnum.stateOf(1)).getStateInfo());
 //                }
 
@@ -185,5 +187,50 @@ public class SeckillServiceImpl implements SeckillService {
             logger.error("##userPhone: " + userPhone + " " + ex.getMessage());
             throw new SeckillException(ex.getMessage());
         }
+    }
+
+    // Purpose: decrement stockcount in redis
+    public void handleInRedis(String mqMessage) {
+
+        SeckillMsgBody body = gson.fromJson(mqMessage, SeckillMsgBody.class);
+        Long seckillSwagId = body.getSeckillSwagId();
+        Long userPhone = body.getUserPhone();
+        logger.info("decrementRedisPGStockCountAndSaveOrder seckillSwagID: "+seckillSwagId + " userPhone: "+ userPhone);
+
+        long remainingStockCount = 0;
+        BigDecimal seckill_price = null;
+        long dealStartTs = 0;
+        long dealEndTs = 0;
+        try (Jedis jedis = jedisPool.getResource()) {
+            // Non-repeated purchase - Update Redis Url with new stockCount
+            String seckill_url = jedis.get(GeneralUtil.getUrlRedisKey(seckillSwagId));
+            UrlExposer url = gson.fromJson(seckill_url, UrlExposer.class);
+            if (url != null && url.getStockCount() > 0) {
+                url.setStockCount(url.getStockCount() - 1);
+                remainingStockCount = url.getStockCount();
+                if (url.getStockCount() <= 0) {
+                    throw new SeckillCloseException("Sold out. 卖完啦洗洗睡吧.");
+                }
+                dealStartTs = url.getDealStart();
+                dealEndTs = url.getDealEnd();
+                seckill_price = url.getSeckill_price();
+                Date currentSysTime = new Date();
+                if(currentSysTime.getTime() > dealStartTs && currentSysTime.getTime() < dealEndTs ) {
+                    // Redis: update stockCount...
+                    jedis.set(GeneralUtil.getUrlRedisKey(seckillSwagId), gson.toJson(url));
+
+                    // If sales is still on-going(here is only double check incase FE exposes the api endpoint for seckill_execute method)
+                    //  create a new msg and send to a service to update Postgres stockCount and persist the seckillOrder record.
+                    logger.info("Redis part done... now asynchoursly call postgres to insert order");
+                }
+            }
+        }
+    }
+
+    // updateInventory only interacts to postgres
+    @Transactional
+    public SeckillExecution updateInventory(long seckillid, long userPhone) {
+        //执行秒杀逻辑:减库存 + 记录购买行为
+        return null;
     }
 }

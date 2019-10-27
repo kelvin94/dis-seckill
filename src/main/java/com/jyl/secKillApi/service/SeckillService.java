@@ -27,17 +27,25 @@ public interface SeckillService {
     /**
      * 秒杀开始时输出暴露秒杀的地址
      * 否者输出系统时间和秒杀时间
-     *
+     * <p>
      * // exposer = 暴露接口用到的方法，目的就是获取秒杀商品抢购的地址
+     *
      * @param seckillId
      */
     UrlExposer exportSeckillUrl(Long seckillId);
 
-        /**
-         * 执行秒杀的操作
-         *
-         * @param requestParam
-         */
+    /**
+     * 执行秒杀的操作
+     *
+     * @param requestParam
+     */
     SeckillExecution executeSeckill(SeckillParameter requestParam)
             throws Exception;
+
+    /**
+     * @param msg: RabbitMQ message, constructed by SeckillMsgBody class
+     */
+    void handleInRedis(String msg);
+
+    public SeckillExecution updateInventory(long seckillid, long userPhone);
 }
