@@ -72,10 +72,11 @@ public class SeckillServiceImpl implements SeckillService {
         // get jedis connection from connection pool
         Jedis jedis = null;
         try {
+            logger.info("Export swag url from Redis--->");
             jedis = jedisPool.getResource();
             // check if the key(swag id) is in redis, if exists, decompose the json convert it back to POJO
             if(jedis.exists(GeneralUtil.getUrlRedisKey(seckillSwagId))) {
-                logger.info("Seckill product exists in Redis. Returning obj in redis.");
+                logger.info("Seckill product exists in Redis. Returning obj in redis-->");
                 String redis_value = jedis.get(GeneralUtil.getUrlRedisKey(seckillSwagId));
                 return gson.fromJson(redis_value, UrlExposer.class);
             }
@@ -91,7 +92,7 @@ public class SeckillServiceImpl implements SeckillService {
 
 
         // not in the cache then continue with the normal postgres call and store the url in redis as a json
-        logger.info("#.....generating url.. seckillSwagId " + seckillSwagId);
+        logger.info("Generating url from DB.. seckillSwagId " + seckillSwagId);
 
         Optional<SeckillSwag> swag = swagRepository.findBySeckillSwagId(seckillSwagId);
         if(swag.isPresent()) {
@@ -105,7 +106,7 @@ public class SeckillServiceImpl implements SeckillService {
             Date now = new Date();
             int currentStockCount = swag.get().getStockCount();
             if(currentStockCount > 0 && now.getTime() > startTs.getTime() && now.getTime() < endTs.getTime()) {
-                logger.info("Sales is happening.. current stock count="+currentStockCount + " swagID="+seckillSwagId);
+                logger.info("特价中.. current stock count="+currentStockCount + " swagID="+seckillSwagId);
                 UrlExposer returnValue = new UrlExposer(
                         true, md5Url, swag.get().getSeckillSwagId(),
                         currentStockCount, swag.get().getStartTime().getTime(), swag.get().getEndTime().getTime(), swag.get().getSeckill_price());
@@ -190,6 +191,7 @@ public class SeckillServiceImpl implements SeckillService {
     }
 
     // Purpose: decrement stockcount in redis
+    @Transactional
     public void handleInRedis(String mqMessage) {
 
         SeckillMsgBody body = gson.fromJson(mqMessage, SeckillMsgBody.class);
@@ -197,7 +199,7 @@ public class SeckillServiceImpl implements SeckillService {
         Long userPhone = body.getUserPhone();
         logger.info("decrementRedisPGStockCountAndSaveOrder seckillSwagID: "+seckillSwagId + " userPhone: "+ userPhone);
 
-        long remainingStockCount = 0;
+        int remainingStockCount = 0;
         BigDecimal seckill_price = null;
         long dealStartTs = 0;
         long dealEndTs = 0;
@@ -206,8 +208,9 @@ public class SeckillServiceImpl implements SeckillService {
             String seckill_url = jedis.get(GeneralUtil.getUrlRedisKey(seckillSwagId));
             UrlExposer url = gson.fromJson(seckill_url, UrlExposer.class);
             if (url != null && url.getStockCount() > 0) {
-                url.setStockCount(url.getStockCount() - 1);
                 remainingStockCount = url.getStockCount();
+                remainingStockCount--;
+                url.setStockCount(remainingStockCount);
                 if (url.getStockCount() <= 0) {
                     throw new SeckillCloseException("Sold out. 卖完啦洗洗睡吧.");
                 }
@@ -221,16 +224,20 @@ public class SeckillServiceImpl implements SeckillService {
 
                     // If sales is still on-going(here is only double check incase FE exposes the api endpoint for seckill_execute method)
                     //  create a new msg and send to a service to update Postgres stockCount and persist the seckillOrder record.
-                    logger.info("Redis part done... now asynchoursly call postgres to insert order");
+                    logger.info("Redis part done... now call postgres to insert order");
                 }
             }
         }
+
+        // save the order to Postgres
+        updateInventory(seckillSwagId, userPhone, remainingStockCount, seckill_price);
     }
 
     // updateInventory only interacts to postgres
-    @Transactional
-    public SeckillExecution updateInventory(long seckillid, long userPhone) {
-        //执行秒杀逻辑:减库存 + 记录购买行为
-        return null;
+    private void updateInventory(long seckillid, long userPhone, int remainStockCount, BigDecimal seckill_price) {
+        logger.info("Updating inventory...");
+        swagRepository.updateStockCount(remainStockCount, seckillid);
+        logger.info("Inserting order...");
+        orderRepository.insertOder(seckillid, seckill_price,userPhone, 1); // state: 1 = 秒杀成功
     }
 }

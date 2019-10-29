@@ -25,6 +25,7 @@ public class MQChannelManager {
         this.mqConfigBean = mqConfigBean;
     }
 
+    // Note: Using ThreadLocal object to allow multi-threaded
     private ThreadLocal<Channel> localSendChannel = new ThreadLocal<Channel>() {
         public Channel initialValue() {
             logger.info("Creating localSendChannel");

@@ -46,6 +46,4 @@ public interface SeckillService {
      * @param msg: RabbitMQ message, constructed by SeckillMsgBody class
      */
     void handleInRedis(String msg);
-
-    public SeckillExecution updateInventory(long seckillid, long userPhone);
 }

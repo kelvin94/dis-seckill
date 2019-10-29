@@ -15,10 +15,6 @@ import java.util.concurrent.TimeoutException;
 public class MQConfig {
     @Value("${app.mqhost}")
     private String MQHost;
-    private final String routingKey_jiankuExchangeToQueue = "jianku_routingKey";
-
-    private final String jianKuExchangename = "jianku_exchange";
-//    private final String jianKuQueuename = "jianku_queue";
 
     @Bean
     public MQConfigBean mqConfigBean() {
@@ -41,45 +37,5 @@ public class MQConfig {
         connectionFactory.setHost(MQHost);
         return connectionFactory.newConnection();
     }
-
-
-
-
-//
-//    @Bean
-//    public DirectExchange jianKuExchange() {
-//        return new DirectExchange(jianKuExchangename);
-//    }
-//
-//    @Bean
-//    public Queue jianKuQueue() {
-//        return new Queue(jianKuQueuename);
-//    }
-//
-//    @Bean
-//    public Binding declareBindingJianKu() {
-//        return BindingBuilder.bind(jianKuQueue()).to(jianKuExchange()).with(routingKey_jiankuExchangeToQueue);
-//    }
-//
-//    @Bean
-//    public Jackson2JsonMessageConverter producerJackson2MessageConverter() {
-//        return new Jackson2JsonMessageConverter();
-//    }
-//
-//    @Bean
-//    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-//        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-//        rabbitTemplate.setMessageConverter(producerJackson2MessageConverter());
-//        return rabbitTemplate;
-//    }
-
-
-//    @Bean
-//    public Declarables topicBindings() {
-////        Queue topicQueue1 = new Queue(seckillQueueName, true);
-////        TopicExchange topicExchange = new TopicExchange(exchangeName);
-////        return new Declarables(topicQueue1, topicExchange,
-////                BindingBuilder.bind(topicQueue1).to(topicExchange).with(GeneralUtil.SECKILL_QUEUE_ROUTING_KEY));
-//    }
 
 }

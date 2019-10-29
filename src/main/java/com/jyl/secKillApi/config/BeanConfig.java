@@ -27,13 +27,8 @@ public class BeanConfig {
 //        return new CheckUserAuthorizationService(restTemplate, jsonObjectMapper);
 //    }
 
-//    @Bean
-//    public RedisUtil redisUtil(RedisTemplate redisTemplate) {return new RedisUtil(redisTemplate);}
-
-
     @Bean
     public Gson gson() {return new Gson();}
-
 
     @Bean
     public CheckAuthInterceptor checkAuthInterceptor(CheckUserAuthorizationService checkUserAuthorizationService) { return new CheckAuthInterceptor(checkUserAuthorizationService);}

@@ -22,5 +22,5 @@ public interface SwagRepository extends JpaRepository<SeckillSwag, Long> {
 
     @Modifying
     @Query(value = "update seckill_swag set stock_count = ?1 where seckill_swag_id = ?2", nativeQuery = true)
-    public int updateStockCount(Long newSockCount, Long seckillSwagId);
+    public int updateStockCount(int newSockCount, Long seckillSwagId);
 }

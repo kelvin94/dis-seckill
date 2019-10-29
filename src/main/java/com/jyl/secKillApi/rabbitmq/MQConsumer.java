@@ -60,23 +60,6 @@ public class MQConsumer {
         if (channel != null) {
             channel.basicConsume(mqConfigBean.getQueue(), false, consumer);
         }
-
-//        logger.info("[MQConsumer] receive msg from jianku queue: "+msg);
-//        String[] str = msg.split("#");
-//        Long remainingStockCount = Long.valueOf(str[0]);
-//        SeckillOrder order = gson.fromJson(str[1], SeckillOrder.class);
-//        logger.info("[MQConsumer] Decomposed remainingStockCount: "+ remainingStockCount + " seckillOrder: " + order);
-//
-//        logger.info("[MQConsumer][jiankuQueue] start persist to Postgres");
-//        int updatedRows = swagRepository.updateStockCount(remainingStockCount, order.getSecKillSwag().getSeckillSwagId());
-//        logger.info("[MQConsumer](Postgres) 完成更新库存");
-//        if (updatedRows <= 1) {
-//            throw new Exception("[MQConsumer]Somethings wrong...Cannot swag's stock_count.");
-//        } else {
-//            orderRepository.insertOder(order.getSecKillSwag().getSeckillSwagId(), order.getTotal(), order.getOrderId().getUserPhone(), order.getState());
-//            logger.info("[MQConsumer](Postgres) 更新Order完毕");
-//        }
-
     }
 
     private class MyDefaultConsumer extends DefaultConsumer {
