@@ -29,6 +29,7 @@ public class SecKillApiApplication {
 	@Autowired
     private SeckillService seckillService;
 
+
 	@EventListener(ApplicationReadyEvent.class)
 	public void initTask() throws Exception {
 		logger.info("Consumer startToConsumeMsg--->");
@@ -36,7 +37,8 @@ public class SecKillApiApplication {
 		// Pre-load one product to redis
         JedisPool jedisPool = new JedisPool(redisHost);
         try(Jedis jedis = jedisPool.getResource();) {
-            jedis.flushAll();
+//            jedis.flushAll();
+            jedis.flushDB();
         }
         seckillService.exportSeckillUrl(1L);
 

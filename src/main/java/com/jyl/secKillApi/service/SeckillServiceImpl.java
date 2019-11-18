@@ -152,7 +152,12 @@ public class SeckillServiceImpl implements SeckillService {
             String str_order = null;
             try {
                 jedis = jedisPool.getResource();
+                logger.debug("key: "+GeneralUtil.getSeckillOrderRedisKey(userPhone, seckillSwagId));
                 str_order = jedis.get(GeneralUtil.getSeckillOrderRedisKey(userPhone, seckillSwagId));
+            } catch(Exception e) {
+                logger.error("Exception thrown..." + e.getMessage());
+                e.printStackTrace();
+                throw e;
             } finally {
                 if(jedis!=null) {
                     logger.info("Redis conn close");
@@ -220,8 +225,9 @@ public class SeckillServiceImpl implements SeckillService {
                 Date currentSysTime = new Date();
                 if(currentSysTime.getTime() > dealStartTs && currentSysTime.getTime() < dealEndTs ) {
                     // Redis: update stockCount...
+                    logger.info("updating redis stockCount...");
                     jedis.set(GeneralUtil.getUrlRedisKey(seckillSwagId), gson.toJson(url));
-
+                    jedis.set(GeneralUtil.getSeckillOrderRedisKey(userPhone, seckillSwagId), "sfasfdsa");// "1" as value to indicate this person has placed an order of this product
                     // If sales is still on-going(here is only double check incase FE exposes the api endpoint for seckill_execute method)
                     //  create a new msg and send to a service to update Postgres stockCount and persist the seckillOrder record.
                     logger.info("Redis part done... now call postgres to insert order");

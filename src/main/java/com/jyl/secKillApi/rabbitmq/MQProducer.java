@@ -61,7 +61,7 @@ public class MQProducer {
             // then call redis 做减库
             try (Jedis jedis = jedisPool.getResource()) {
                 logger.info("Consumer receive msg，put order into Redis...");
-                jedis.sadd(GeneralUtil.getSeckillOrderRedisKey(body.getUserPhone(), body.getSeckillSwagId()), body.getSeckillSwagId()+"@"+body.getUserPhone());
+                jedis.set(GeneralUtil.getSeckillOrderRedisKey(body.getUserPhone(), body.getSeckillSwagId()), body.getSeckillSwagId()+"@"+body.getUserPhone());
             }
             logger.info("Redis - 减库结束...");
 

@@ -51,7 +51,10 @@ public class MQConsumer {
         try {
             channel = mqConnectionReceive.createChannel();
             channel.queueDeclare(mqConfigBean.getQueue(),true,false, false,null);
-            channel.basicQos(0,1,false); // false = this channel setting should be applied to each consumer; true = setting applied to the whole channel
+            // false = this channel setting should be applied to each consumer; true = setting applied to the whole channel
+            // 2 = prefetchCount, tells broker(RabbitMQ) not to give more than 2 msgs to a worker at a time.
+            channel.basicQos(0,2,false);
+
         } catch (IOException e) {
             logger.error(e.getMessage());
         }

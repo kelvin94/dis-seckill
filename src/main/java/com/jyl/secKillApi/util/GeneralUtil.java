@@ -29,6 +29,6 @@ public class GeneralUtil {
     }
 
     public static  String getSeckillOrderRedisKey(Long userPhone, Long seckillSwagId) {
-        return userPhone+"@"+seckillSwagId;
+        return userPhone+":"+seckillSwagId;
     }
 }
