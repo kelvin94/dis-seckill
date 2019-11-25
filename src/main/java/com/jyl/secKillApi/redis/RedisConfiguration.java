@@ -28,6 +28,7 @@ public class RedisConfiguration {
 
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
+
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(REDIS_HOSTNAME, REDIS_PORT);
         redisStandaloneConfiguration.setPassword(RedisPassword.none());
         return new JedisConnectionFactory(redisStandaloneConfiguration);
@@ -43,7 +44,6 @@ public class RedisConfiguration {
     @Bean
     public JedisPool jedisPool() {
         final JedisPoolConfig poolConfig = new JedisPoolConfig();
-        logger.info("JedisPoolConfig Injection begins...注入开始: ");
 
         poolConfig.setMaxTotal(10);
         poolConfig.setMaxIdle(10);
@@ -54,7 +54,7 @@ public class RedisConfiguration {
         poolConfig.setTimeBetweenEvictionRunsMillis(Duration.ofSeconds(30).toMillis());
         poolConfig.setNumTestsPerEvictionRun(3);
         poolConfig.setBlockWhenExhausted(true);
-        return new JedisPool(poolConfig, "localhost");
+        return new JedisPool(poolConfig, REDIS_HOSTNAME);
     }
 
 }

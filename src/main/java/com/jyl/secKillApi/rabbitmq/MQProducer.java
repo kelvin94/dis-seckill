@@ -40,16 +40,16 @@ public class MQProducer {
     }
 
     public void jianku_send(SeckillMsgBody body) throws IOException {
-        logger.info("Sending message...");
+        logger.info("...[MQProducer]Sending message...msg id: "+body.getMsgId());
         String msg = gson.toJson(body);
         // get current thread's connection
         Channel channel = mqChannelManager.getSendChannel();
         channel.basicPublish("", mqConfigBean.getQueue(), MessageProperties.PERSISTENT_TEXT_PLAIN, msg.getBytes()); // MessageProperties.PERSISTENT_TEXT_PLAIN = set messages to be persistent
-        System.out.println("[MQProducer] sent msg '" + msg + "'");
+        logger.info("...[MQProducer] sent msg '" + msg + "'");
 
         boolean isSentAcked = false;
         try {
-            logger.info("Waiting broker replies ACK message...");
+            logger.info("...[MQProducer]Waiting broker replies ACK message...");
             isSentAcked = channel.waitForConfirms(100); // listen for confirms, if broker somehow cannot take care of
             // the msg and returns a NAck, will throw an exception
         } catch (InterruptedException | TimeoutException e) {
@@ -60,17 +60,17 @@ public class MQProducer {
             // Broker successfully get the msg
             // then call redis 做减库
             try (Jedis jedis = jedisPool.getResource()) {
-                logger.info("Consumer receive msg，put order into Redis...");
+                logger.info("...[MQProducer]Consumer receive msg，put order into Redis...");
                 jedis.set(GeneralUtil.getSeckillOrderRedisKey(body.getUserPhone(), body.getSeckillSwagId()), body.getSeckillSwagId()+"@"+body.getUserPhone());
             }
-            logger.info("Redis - 减库结束...");
+            logger.info("...[MQProducer]Redis - 减库结束...");
 
         } else {
             // Broker somehow cannot get the msg
             // retry to publish the msg
-            logger.info("Resending msg...");
+            logger.info("...[MQProducer]Resending msg...");
             channel.basicPublish("", mqConfigBean.getQueue(), MessageProperties.PERSISTENT_TEXT_PLAIN, msg.getBytes());
-            logger.info("[MQProducer] re-sent msg '" + msg + "'");
+            logger.info("...[MQProducer] re-sent msg '" + msg + "'");
 
         }
     }

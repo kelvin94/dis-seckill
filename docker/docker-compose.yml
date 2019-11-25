@@ -1,0 +1,38 @@
+version: "3.1"
+services:
+    rabbitmq-container:
+        image: rabbitmq:3-management
+        hostname: rabbitmq-container
+        networks:
+            - net
+        ports:
+            - 5672:5672
+            - 15672:15672
+
+    redis-container:
+        image: redis
+        hostname: redis-container
+        restart: on-failure
+        networks:
+            - net
+        ports:
+            - 6379:6379
+    seckill-container:
+        # if make changes to the image, we need to rebuild the img
+        build:
+            context: /home/jylkelvin/Documents/all_projects/secKill/
+            dockerfile: ./docker/Dockerfile-seckill/Dockerfile
+        ports:
+            - 8082:8082
+        hostname: seckill-container
+        environment:
+            -mqhost: rabbitmq-container
+            -redisHost: redis-container
+        restart: on-failure
+        networks:
+            - net
+        depends_on:
+            - rabbitmq-container
+            - redis-container
+networks:
+    net:

@@ -53,7 +53,7 @@ public class MQConsumer {
             channel.queueDeclare(mqConfigBean.getQueue(),true,false, false,null);
             // false = this channel setting should be applied to each consumer; true = setting applied to the whole channel
             // 2 = prefetchCount, tells broker(RabbitMQ) not to give more than 2 msgs to a worker at a time.
-            channel.basicQos(0,2,false);
+            channel.basicQos(0,1,false);
 
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -72,17 +72,18 @@ public class MQConsumer {
             this.channel = channel;
         }
 
+
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope,
                                    AMQP.BasicProperties properties, byte[] body) throws IOException {
             // "handleDelivery" = method Called when a delivery appears for this consumer.
-            logger.info("In receive_threadId_"+Thread.currentThread().getId());
+            logger.info("...[MQConsumer] In receive_threadId_"+Thread.currentThread().getId());
             String msg = new String(body, "UTF-8");
             SeckillMsgBody msgBody = gson.fromJson(msg, SeckillMsgBody.class);
             AckAction ackAction = AckAction.ACCEPT;
 
             try {
-                logger.info("跳转到handleInRedis - 减库中...");
+                logger.info("...[MQConsumer]跳转到handleInRedis - 减库中...");
                 seckillService.handleInRedis(msg);
             } catch (SeckillException e) {
                 if (e.getSeckillStateEnum() == SeckillStateEnum.SOLD_OUT
@@ -92,20 +93,20 @@ public class MQConsumer {
                 } else {
                     // Unknown issues, requeue the msg
                     logger.error(e.getMessage(), e);
-                    logger.info("---->NACK--error_requeue!!!");
+                    logger.info("...[MQConsumer]---->NACK--error_requeue!!!");
                     ackAction = AckAction.RETRY;
                 }
             } finally {
                 switch (ackAction) {
                     case ACCEPT:
                         // response ack to broker
-                        logger.info("---->ACK");
+                        logger.info("...[MQConsumer]---->ACK");
                         this.channel.basicAck(envelope.getDeliveryTag(), false);
 
                         break;
                     case THROW:
                         // response ack to broker
-                        logger.info("--LET_MQ_ACK REASON:SeckillStateEnum.SOLD_OUT,SeckillStateEnum.REPEAT_KILL");
+                        logger.info("...[MQConsumer]--LET_MQ_ACK REASON:SeckillStateEnum.SOLD_OUT,SeckillStateEnum.REPEAT_KILL");
 
                         this.channel.basicAck(envelope.getDeliveryTag(), false);
 

@@ -8,12 +8,9 @@ import org.apache.logging.log4j.Logger;
 
 public class GeneralUtil {
     private static Logger logger = LogManager.getLogger(SeckillController.class.getSimpleName());
-//    public static final String SECKILL_QUEUE = "seckill.1";
-//    public static final String SECKILL_QUEUE_ROUTING_KEY = "jianku";
     public static final String jianKuExchangename = "jianku_exchange";
     public static final String jiankuRoutingKey = "jianku";
     public static final String jianKuQueuename = "jiankuQueue";
-
     public static String convertToJson(Object obj) throws JsonProcessingException {
 
         if(obj != null) {

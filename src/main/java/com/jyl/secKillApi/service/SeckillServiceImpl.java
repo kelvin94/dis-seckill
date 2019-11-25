@@ -23,10 +23,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class SeckillServiceImpl implements SeckillService {
@@ -174,7 +171,7 @@ public class SeckillServiceImpl implements SeckillService {
                 /*
                     2019-Oct-26 Update: encapsulate swagID + userPhone as a msg, send the msg to the jianku_exchange
                  */
-                SeckillMsgBody msg = new SeckillMsgBody(seckillSwagId, userPhone);
+                SeckillMsgBody msg = new SeckillMsgBody(Calendar.getInstance(), seckillSwagId, userPhone);
                     // // 进入待秒杀队列，进行后续串行操作
                     mqProducer.jianku_send(msg);
                     // 立即返回给客户端，说明秒杀成功了
