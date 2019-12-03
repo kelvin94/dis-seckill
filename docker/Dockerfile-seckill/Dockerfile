@@ -23,5 +23,6 @@ ADD ${JAR_FILE} /var/seckill/seckill.jar
 #CMD ["/rabbitmq-init.sh"]
 
 ADD ./docker/Dockerfile-seckill/start.sh /start.sh
+# Arguments to the EntryPoint
 CMD ["/start.sh"]
 ENTRYPOINT ["/bin/bash"]
