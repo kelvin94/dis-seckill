@@ -11,9 +11,10 @@ public class GeneralUtil {
     public static final String jianKuExchangename = "jianku_exchange";
     public static final String jiankuRoutingKey = "jianku";
     public static final String jianKuQueuename = "jiankuQueue";
+
     public static String convertToJson(Object obj) throws JsonProcessingException {
 
-        if(obj != null) {
+        if (obj != null) {
             ObjectMapper mapper = new ObjectMapper();
             logger.debug("## obj " + mapper.writeValueAsString(obj));
             return mapper.writeValueAsString(obj);
@@ -22,10 +23,10 @@ public class GeneralUtil {
     }
 
     public static String getUrlRedisKey(Long seckillSwagId) {
-        return "swagUrl:"+seckillSwagId;
+        return "swagUrl:" + seckillSwagId;
     }
 
-    public static  String getSeckillOrderRedisKey(Long userPhone, Long seckillSwagId) {
-        return userPhone+":"+seckillSwagId;
+    public static String getSeckillOrderRedisKey(Long userPhone, Long seckillSwagId) {
+        return userPhone + ":" + seckillSwagId;
     }
 }

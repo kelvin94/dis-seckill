@@ -18,7 +18,8 @@ public class SeckillExecution implements Serializable {
     // 秒杀成功的订单对象
     private SeckillOrder seckillOrder;
 
-    public SeckillExecution(Long seckillSwagId, int state, SeckillStateEnum seckillStatEnum, SeckillOrder seckillOrder) {
+    public SeckillExecution(Long seckillSwagId, int state, SeckillStateEnum seckillStatEnum,
+                            SeckillOrder seckillOrder) {
         // 用于seckill success
         this.seckillSwagId = seckillSwagId;
         this.state = state;

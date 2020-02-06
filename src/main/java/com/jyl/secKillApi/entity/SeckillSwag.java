@@ -31,7 +31,8 @@ import java.sql.Date;
 //)
 public class SeckillSwag implements Serializable {
     @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY) // @GeneratedValue annotation is to configure the way of increment of the specified column(field).
+//    @GeneratedValue(strategy = GenerationType.IDENTITY) // @GeneratedValue annotation is to configure the way of
+//    increment of the specified column(field).
     private long seckillSwagId; //商品ID
     private String title; //商品标题
     private BigDecimal price; //商品原价格

@@ -31,19 +31,19 @@ public class CheckUserAuthorizationService {
     }
 
     public String findAccountAuthorization(String token) {
-        logger.debug("## findAccountAuthorization start" );
+        logger.debug("## findAccountAuthorization start");
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", token);
         headers.set("Accept", "application/json");
         headers.setContentType(MediaType.APPLICATION_JSON);
         final String url = authApiUrl + endPoint;
-        logger.debug("# authApiUrl "+ authApiUrl);
-        logger.debug("# endPoint "+ endPoint);
+        logger.debug("# authApiUrl " + authApiUrl);
+        logger.debug("# endPoint " + endPoint);
 
-        logger.debug("# url "+ url);
+        logger.debug("# url " + url);
         HttpEntity entity = new HttpEntity(headers);
         ResponseEntity<String> response = resTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        logger.debug("# auth api response "+ response);
+        logger.debug("# auth api response " + response);
         String responseBody = response.getBody();
         try {
             Map map = jsonObjectMapper.readValue(responseBody, Map.class);

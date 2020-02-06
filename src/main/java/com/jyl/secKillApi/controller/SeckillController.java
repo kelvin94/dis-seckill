@@ -30,7 +30,6 @@ public class SeckillController {
     }
 
 
-
 //    @RequestMapping(path = "/cache/clear", method = RequestMethod.GET)
 //    public void clearCache() {
 //        cacheService.clearCache();
@@ -45,7 +44,7 @@ public class SeckillController {
         try {
             response = GeneralUtil.convertToJson(result);
 
-        } catch (Exception ex ) {
+        } catch (Exception ex) {
             logger.error("JSON processing exception!!" + ex.getMessage());
             throw ex;
         }
@@ -53,8 +52,8 @@ public class SeckillController {
     }
 
 
-
-    @RequestMapping(path = "/swags/{seckillSwagId}", method = RequestMethod.GET, produces =  MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path = "/swags/{seckillSwagId}", method = RequestMethod.GET, produces =
+            MediaType.APPLICATION_JSON_VALUE)
     public String findOneSwag(@PathVariable(value = "seckillSwagId", required = true) Long seckillSwagId) {
         SeckillSwag result = seckillService.findBySeckillSwagId(seckillSwagId);
         try {
@@ -66,10 +65,11 @@ public class SeckillController {
         return null;
     }
 
-    @RequestMapping(path = "/swags/{seckillSwagId}/expose", method = RequestMethod.GET, produces =  MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path = "/swags/{seckillSwagId}/expose", method = RequestMethod.GET, produces =
+            MediaType.APPLICATION_JSON_VALUE)
     public String exposeSwag(@PathVariable(value = "seckillSwagId", required = true) Long seckillSwagId) {
         UrlExposer result = seckillService.exportSeckillUrl(seckillSwagId);
-        if(result != null) {
+        if (result != null) {
             try {
                 return GeneralUtil.convertToJson(result);
             } catch (Exception ex) {
@@ -85,17 +85,19 @@ public class SeckillController {
         int invalidState = -1; // 无效 for any exception thrown
 
 //        try {
-            result = seckillService.executeSeckill(requestParam);
+        result = seckillService.executeSeckill(requestParam);
 //        } catch (Exception e) {
 //            logger.error(e.getMessage());
-//            return GeneralUtil.convertToJson(new SeckillExecution(requestParam.getSeckillSwagId(), invalidState, e.getMessage()));
+//            return GeneralUtil.convertToJson(new SeckillExecution(requestParam.getSeckillSwagId(), invalidState, e
+//            .getMessage()));
 //        }
-        if(result != null) {
+        if (result != null) {
 //            try {
-                return GeneralUtil.convertToJson(result);
+            return GeneralUtil.convertToJson(result);
 //            } catch (Exception ex) {
 //                logger.error(ex.getMessage());
-//                return GeneralUtil.convertToJson(new SeckillExecution(requestParam.getSeckillSwagId(), invalidState, ex.getMessage()));
+//                return GeneralUtil.convertToJson(new SeckillExecution(requestParam.getSeckillSwagId(),
+//                invalidState, ex.getMessage()));
 //            }
         }
         return null;

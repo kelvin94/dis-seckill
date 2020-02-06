@@ -1,7 +1,6 @@
 package com.jyl.secKillApi.rabbitmq;
 
 import com.jyl.secKillApi.config.MQConfigBean;
-import com.jyl.secKillApi.redis.RedisConfiguration;
 import com.jyl.secKillApi.util.GeneralUtil;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;

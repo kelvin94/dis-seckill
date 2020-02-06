@@ -16,7 +16,7 @@ import java.util.Date;
 @EqualsAndHashCode
 @Entity
 public class SeckillOrder implements Serializable {
-//    @Id
+    //    @Id
 //    private long seckillSwagId;
     @EmbeddedId
     private SeckillOrderPrimaryKey orderId;
@@ -27,7 +27,9 @@ public class SeckillOrder implements Serializable {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @Column(name = "create_time", insertable = false) // "insertable" = false, get the column out of your SQL INSERTs so that dbms will set "create_time" to the default value we set in the schema.
+    @Column(name = "create_time", insertable = false)
+    // "insertable" = false, get the column out of your SQL INSERTs so that dbms will set "create_time" to the
+    // default value we set in the schema.
     private Date createTime; //创建时间
 
     private int state; //订单状态， -1:无效 0:成功 1:已付款

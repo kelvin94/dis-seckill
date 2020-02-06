@@ -27,6 +27,7 @@ public class MQConsumer {
     private final MQConfigBean mqConfigBean;
     private final JedisPool jedisPool;
     private final SeckillService seckillService;
+
     public MQConsumer(
             Gson gson,
             SwagRepository swagRepository,
@@ -50,10 +51,11 @@ public class MQConsumer {
         Channel channel = null;
         try {
             channel = mqConnectionReceive.createChannel();
-            channel.queueDeclare(mqConfigBean.getQueue(),true,false, false,null);
-            // false = this channel setting should be applied to each consumer; true = setting applied to the whole channel
+            channel.queueDeclare(mqConfigBean.getQueue(), true, false, false, null);
+            // false = this channel setting should be applied to each consumer; true = setting applied to the whole
+            // channel
             // 2 = prefetchCount, tells broker(RabbitMQ) not to give more than 2 msgs to a worker at a time.
-            channel.basicQos(0,1,false);
+            channel.basicQos(0, 1, false);
 
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -67,6 +69,7 @@ public class MQConsumer {
 
     private class MyDefaultConsumer extends DefaultConsumer {
         private Channel channel;
+
         MyDefaultConsumer(Channel channel) {
             super(channel);
             this.channel = channel;
@@ -77,7 +80,7 @@ public class MQConsumer {
         public void handleDelivery(String consumerTag, Envelope envelope,
                                    AMQP.BasicProperties properties, byte[] body) throws IOException {
             // "handleDelivery" = method Called when a delivery appears for this consumer.
-            logger.info("...[MQConsumer] In receive_threadId_"+Thread.currentThread().getId());
+            logger.info("...[MQConsumer] In receive_threadId_" + Thread.currentThread().getId());
             String msg = new String(body, "UTF-8");
             SeckillMsgBody msgBody = gson.fromJson(msg, SeckillMsgBody.class);
             AckAction ackAction = AckAction.ACCEPT;
@@ -106,13 +109,14 @@ public class MQConsumer {
                         break;
                     case THROW:
                         // response ack to broker
-                        logger.info("...[MQConsumer]--LET_MQ_ACK REASON:SeckillStateEnum.SOLD_OUT,SeckillStateEnum.REPEAT_KILL");
+                        logger.info("...[MQConsumer]--LET_MQ_ACK REASON:SeckillStateEnum.SOLD_OUT,SeckillStateEnum" +
+                                ".REPEAT_KILL");
 
                         this.channel.basicAck(envelope.getDeliveryTag(), false);
 
                         break;
                     case RETRY:
-                        this.channel.basicNack(envelope.getDeliveryTag(), false,true);
+                        this.channel.basicNack(envelope.getDeliveryTag(), false, true);
                         break;
                 }
             }

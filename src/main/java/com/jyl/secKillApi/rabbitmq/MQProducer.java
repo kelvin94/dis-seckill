@@ -40,11 +40,12 @@ public class MQProducer {
     }
 
     public void jianku_send(SeckillMsgBody body) throws IOException {
-        logger.info("...[MQProducer]Sending message...msg id: "+body.getMsgId());
+        logger.info("...[MQProducer]Sending message...msg id: " + body.getMsgId());
         String msg = gson.toJson(body);
         // get current thread's connection
         Channel channel = mqChannelManager.getSendChannel();
-        channel.basicPublish("", mqConfigBean.getQueue(), MessageProperties.PERSISTENT_TEXT_PLAIN, msg.getBytes()); // MessageProperties.PERSISTENT_TEXT_PLAIN = set messages to be persistent
+        channel.basicPublish("", mqConfigBean.getQueue(), MessageProperties.PERSISTENT_TEXT_PLAIN, msg.getBytes());
+        // MessageProperties.PERSISTENT_TEXT_PLAIN = set messages to be persistent
         logger.info("...[MQProducer] sent msg '" + msg + "'");
 
         boolean isSentAcked = false;
@@ -61,7 +62,8 @@ public class MQProducer {
             // then call redis 做减库
             try (Jedis jedis = jedisPool.getResource()) {
                 logger.info("...[MQProducer]Consumer receive msg，put order into Redis...");
-                jedis.set(GeneralUtil.getSeckillOrderRedisKey(body.getUserPhone(), body.getSeckillSwagId()), body.getSeckillSwagId()+"@"+body.getUserPhone());
+                jedis.set(GeneralUtil.getSeckillOrderRedisKey(body.getUserPhone(), body.getSeckillSwagId()),
+                        body.getSeckillSwagId() + "@" + body.getUserPhone());
             }
             logger.info("...[MQProducer]Redis - 减库结束...");
 

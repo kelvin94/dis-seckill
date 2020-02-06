@@ -1,6 +1,6 @@
 package com.jyl.secKillApi.execptions;
 
-public class RepeatkillException extends SeckillException{
+public class RepeatkillException extends SeckillException {
 
     public RepeatkillException(String msg) {
         super(msg);

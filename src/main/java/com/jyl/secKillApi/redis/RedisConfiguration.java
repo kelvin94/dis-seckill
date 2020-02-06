@@ -17,7 +17,8 @@ import java.time.Duration;
 @Configuration
 public class RedisConfiguration {
     // CachingConfigurerSupport is an impl class, that impl CachingConfigurer interface, which provides methods
-    //      to specify explicitly how caches are resolved and how keys are generated for annotation-driven cache management.
+    //      to specify explicitly how caches are resolved and how keys are generated for annotation-driven cache
+    //      management.
 
     private static Logger logger = LogManager.getLogger(RedisConfiguration.class.getSimpleName());
 
@@ -29,7 +30,8 @@ public class RedisConfiguration {
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
 
-        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(REDIS_HOSTNAME, REDIS_PORT);
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(REDIS_HOSTNAME,
+                REDIS_PORT);
         redisStandaloneConfiguration.setPassword(RedisPassword.none());
         return new JedisConnectionFactory(redisStandaloneConfiguration);
     }

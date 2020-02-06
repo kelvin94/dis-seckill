@@ -1,7 +1,7 @@
 package com.jyl.secKillApi.execptions;
 
-public class SeckillCloseException extends SeckillException{
-//    针对秒杀关闭的异常: seckill 过期了
+public class SeckillCloseException extends SeckillException {
+    //    针对秒杀关闭的异常: seckill 过期了
     public SeckillCloseException(String msg) {
         super(msg);
     }

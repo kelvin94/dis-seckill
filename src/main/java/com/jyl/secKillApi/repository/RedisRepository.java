@@ -54,7 +54,7 @@ public class RedisRepository {
         Map<Long, List<UrlExposer>> map = new HashMap<>();
         List<Object> urls = hashOperations.multiGet("url", seckill_swag_ids);
         int index = 0;
-        for(Long seckill_swag_id : seckill_swag_ids) {
+        for (Long seckill_swag_id : seckill_swag_ids) {
             map.put(seckill_swag_id, (List<UrlExposer>) urls.get(index));
             index++;
         }

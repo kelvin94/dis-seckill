@@ -1,7 +1,6 @@
 package com.jyl.secKillApi.requestInterceptor;
 
 import com.jyl.secKillApi.service.CheckUserAuthorizationService;
-import com.jyl.secKillApi.service.SeckillServiceImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -28,11 +27,13 @@ public class CheckAuthInterceptor extends HandlerInterceptorAdapter {
         logger.debug("## request " + request);
 
         logger.debug("## invoke prehandle(), request.getHeader(\"Authorization\").indexOf(\"Bearer\")  " + request.getHeader("Authorization").substring(0, 6).equalsIgnoreCase("Bearer"));
-        if(request.getHeader("Authorization") != null && request.getHeader("Authorization").substring(0, 6).equalsIgnoreCase("Bearer")) {
+        if (request.getHeader("Authorization") != null && request.getHeader("Authorization").substring(0, 6).equalsIgnoreCase("Bearer")) {
             logger.debug("## request.getHeader(\"Authorization\") != null ");
 
             String token = request.getHeader("Authorization"); // include "Bearer" at the front of the string
-            String roleName = this.authService.findAccountAuthorization(token); // if the token is not valid, roleName will not be returned. if token is not passed spring security's jwtFilter, no result will be returned.
+            String roleName = this.authService.findAccountAuthorization(token); // if the token is not valid,
+            // roleName will not be returned. if token is not passed spring security's jwtFilter, no result will be
+            // returned.
             return roleName != null && !roleName.isEmpty();
         }
         response.setContentType("application/json");

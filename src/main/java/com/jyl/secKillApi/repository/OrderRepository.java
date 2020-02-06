@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 @Repository
 public interface OrderRepository extends JpaRepository<SeckillOrder, Long> {
     @Modifying
-    @Query(value = "insert into seckill_order(seckill_swag_id, total, user_phone, state) values(:seckillSwagId, :dealPrice, :phoneNumber, :state)", nativeQuery = true)
-    public void insertOder(@Param("seckillSwagId") Long seckillSwagId, @Param("dealPrice") BigDecimal dealPrice, @Param("phoneNumber")Long phoneNumber, @Param("state") int state) throws DataIntegrityViolationException;
+    @Query(value = "insert into seckill_order(seckill_swag_id, total, user_phone, state) values(:seckillSwagId, " +
+            ":dealPrice, :phoneNumber, :state)", nativeQuery = true)
+    public void insertOder(@Param("seckillSwagId") Long seckillSwagId, @Param("dealPrice") BigDecimal dealPrice,
+                           @Param("phoneNumber") Long phoneNumber, @Param("state") int state) throws DataIntegrityViolationException;
 }

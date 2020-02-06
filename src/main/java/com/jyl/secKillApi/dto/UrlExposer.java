@@ -26,7 +26,8 @@ public class UrlExposer implements Serializable {
     private BigDecimal seckill_price; //商品秒杀价格
 
 
-    public UrlExposer(boolean isExposed, String md5Url, long seckillSwagId, int stockCount, long dealStart, long dealEnd, BigDecimal seckill_price) {
+    public UrlExposer(boolean isExposed, String md5Url, long seckillSwagId, int stockCount, long dealStart,
+                      long dealEnd, BigDecimal seckill_price) {
         this.isExposed = isExposed;
         this.md5Url = md5Url;
         this.seckillSwagId = seckillSwagId;

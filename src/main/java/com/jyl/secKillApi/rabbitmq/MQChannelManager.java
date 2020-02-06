@@ -31,7 +31,8 @@ public class MQChannelManager {
             logger.info("Creating localSendChannel");
             try {
                 Channel channelInst = connection.createChannel();
-                channelInst.confirmSelect(); // require the broker to confirm the published msg, this feature could be a bottleneck of performance
+                channelInst.confirmSelect(); // require the broker to confirm the published msg, this feature could
+                // be a bottleneck of performance
                 channelInst.queueDeclare(GeneralUtil.jianKuQueuename, true, false, false, null);
                 logger.info("Complete Creating localSendChannel");
 
@@ -51,7 +52,7 @@ public class MQChannelManager {
     public Channel getSendChannel() {
         logger.info("Getting local send channel");
         Channel channel = localSendChannel.get();
-        if(channel == null) {
+        if (channel == null) {
             logger.info("No localSendChannel created, recreating now...");
             // 重新创建队列
             try {

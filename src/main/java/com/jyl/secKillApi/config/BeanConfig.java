@@ -23,13 +23,18 @@ public class BeanConfig {
     }
 
 //    @Bean
-//    public CheckUserAuthorizationService checkUserAuthorizationService(RestTemplate restTemplate, ObjectMapper jsonObjectMapper) {
+//    public CheckUserAuthorizationService checkUserAuthorizationService(RestTemplate restTemplate, ObjectMapper
+//    jsonObjectMapper) {
 //        return new CheckUserAuthorizationService(restTemplate, jsonObjectMapper);
 //    }
 
     @Bean
-    public Gson gson() {return new Gson();}
+    public Gson gson() {
+        return new Gson();
+    }
 
     @Bean
-    public CheckAuthInterceptor checkAuthInterceptor(CheckUserAuthorizationService checkUserAuthorizationService) { return new CheckAuthInterceptor(checkUserAuthorizationService);}
+    public CheckAuthInterceptor checkAuthInterceptor(CheckUserAuthorizationService checkUserAuthorizationService) {
+        return new CheckAuthInterceptor(checkUserAuthorizationService);
+    }
 }
