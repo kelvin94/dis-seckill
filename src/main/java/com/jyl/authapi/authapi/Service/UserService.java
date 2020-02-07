@@ -59,7 +59,7 @@ public class UserService {
     }
 
     public JwtAuthenticationResponse signIn(LoginRequest loginRequest) throws AuthenticationException{
-        Authentication authentication = null;
+        Authentication authentication = null; // Authentication obj represents the token for an auth req for a principal当事人
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
