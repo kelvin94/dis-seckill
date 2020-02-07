@@ -7,8 +7,11 @@ import com.jyl.authapi.authapi.model.User;
 import com.jyl.authapi.authapi.repository.InvitationCodeRepository;
 import com.jyl.authapi.authapi.repository.RoleRepository;
 import com.jyl.authapi.authapi.repository.UserRepository;
+import com.jyl.authapi.authapi.resource.JwtAuthenticationResponse;
+import com.jyl.authapi.authapi.resource.JwtTokenProvider;
 import com.jyl.authapi.authapi.resource.LoginRequest;
 import com.jyl.authapi.authapi.resource.SignUpRequest;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,8 +32,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
@@ -38,7 +40,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 //@RunWith(MockitoJUnitRunner.class)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore( {"javax.script.*","javax.management.*", "org.w3c.dom.*", "org.apache.log4j.*", "org.xml.sax.*",   "javax.xml.*"})
+@PowerMockIgnore( {"javax.script.*","javax.management.*", "org.w3c.dom.*", "org.apache.log4j.*", "org.xml.sax.*",   "javax.xml.*", "javax.security.*"})
 public class AuthapiApplicationTests
 {
     private String code = "some_invit_code";
@@ -63,9 +65,8 @@ public class AuthapiApplicationTests
     private PasswordEncoder passwordEncoder;
     @Mock
     private AuthenticationManager authenticationManager;
-//    @Mock
-//    private SecurityContextHolder sch;
-
+    @Mock
+    private JwtTokenProvider tokenProvider;
 
     @Before
     public void before() {
@@ -103,5 +104,14 @@ public class AuthapiApplicationTests
         verify(roleRepository, times(1)).save(role);
     }
 
+
+    @Test
+    public void signIn() {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        when(authenticationManager.authenticate(Mockito.isA(Authentication.class))).thenReturn(authentication);
+        userService.signIn(loginRequest);
+        verify(tokenProvider, times(1)).generateToken(any(Authentication.class), anyCollection());
+        Assert.assertEquals(authentication, SecurityContextHolder.getContext().getAuthentication());
+    }
 
 }

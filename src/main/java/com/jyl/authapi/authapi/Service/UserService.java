@@ -77,7 +77,8 @@ public class UserService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             Collection<? extends GrantedAuthority> authority = authentication.getAuthorities();
             if(authority == null || authority.isEmpty())
-                return new JwtAuthenticationResponse(null, null, HttpStatus.NOT_FOUND);
+                logger.error("user: " + loginRequest.getUsernameOrEmail() +
+                                "Authoritiees" +HttpStatus.NOT_FOUND);
             String jwt = tokenProvider.generateToken(authentication, authority);
             return new JwtAuthenticationResponse(AuthApiUtil.TOKEN_TYPE, jwt, HttpStatus.OK);
         }
