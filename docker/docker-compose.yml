@@ -1,0 +1,50 @@
+version: "3.1"
+services:
+  rabbitmq-container:
+    image: rabbitmq:3-management
+    hostname: rabbitmq-container
+    volumes:
+      - /c/tmp/rabbitmq-container:/var/rabbitmq-container
+    networks:
+      - net
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  redis-container:
+    image: redis:alpine
+    hostname: redis-container
+    command: ["/bin/sh", "/usr/local/etc/redis/init.sh"]
+    volumes:
+      # Start Windows 下的路径
+      - /c/tmp/redis-container/:/data
+      - /c/tmp/redis-container-log/:/tmp
+      # End Windows 下的路径
+      - ./Dockerfile-redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./Dockerfile-redis/init.sh:/usr/local/etc/redis/init.sh
+    restart: on-failure
+    networks:
+      - net
+    ports:
+      - 6379:6379
+#    seckill-container:
+#        # if make changes to the image, we need to rebuild the img
+#        build:
+#            context: /home/jylkelvin/Documents/all_projects/secKill/
+#            dockerfile: ./docker/Dockerfile-seckill/Dockerfile
+#        ports:
+#            - 8082:8082
+#        hostname: seckill-container
+#        volumes:
+#            - /tmp/seckill-container-log/seckill-log/:/tmp/seckill-log/
+#        environment:
+#            -mqhost: rabbitmq-container
+#            -redisHost: redis-container
+#        restart: on-failure
+#        networks:
+#            - net
+#        depends_on:
+#            - rabbitmq-container
+#            - redis-container
+networks:
+  net:
