@@ -8,7 +8,7 @@
         <version>1.0-SNAPSHOT</version>
 <!--        <relativePath>../Commons</relativePath>-->
     </parent>
-    <artifactId>authApi</artifactId>
+    <artifactId>seckill-authApi</artifactId>
     <version>0.0.1-production-candidate</version>
     <name>seckill-authApi</name>
 
