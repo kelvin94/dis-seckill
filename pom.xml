@@ -10,7 +10,7 @@
     </parent>
     <artifactId>authApi</artifactId>
     <version>0.0.1-production-candidate</version>
-    <name>authApi</name>
+    <name>seckill-authApi</name>
 
 
     <properties>
